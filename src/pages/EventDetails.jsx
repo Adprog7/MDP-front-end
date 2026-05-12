@@ -71,9 +71,12 @@ const EventDetails = () => {
             </div>
           </div>
 
-          <button className="w-full py-4 bg-[#1e2da7] text-white font-bold rounded-2xl hover:bg-[#f06292] transition-all flex items-center justify-center gap-3 text-lg shadow-lg shadow-blue-100">
-            <CreditCard size={22} /> Payer ma place
-          </button>
+          <Link to={`/payment/${event.id}`} className="block w-full">
+            <button className="w-full py-4 bg-[#1e2da7] text-white font-black text-lg rounded-2xl hover:bg-[#f06292] transition-all duration-300 flex items-center justify-center gap-3 shadow-lg shadow-blue-100 mt-4 group">
+                <CreditCard size={22} className="group-hover:scale-110 transition-transform" /> 
+                Payer ma place
+            </button>
+          </Link>
         </div>
       </div>
     </div>
