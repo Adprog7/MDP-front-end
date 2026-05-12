@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { MapPin, Calendar, Clock, Tag, ChevronDown } from 'lucide-react';
+import { MapPin, Calendar, Clock, Tag, ChevronDown, Search as SearchIcon, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
 
 const eventsData = [
   {
@@ -86,9 +88,11 @@ const Home = () => {
                 </div>
               </div>
 
-              <button className="w-full py-3 bg-[#1e2da7] text-white font-bold rounded-xl hover:bg-opacity-90 transition-all">
-                Rejoindre
-              </button>
+              <Link to={`/event/${event.id}`}>
+                <button className="w-full py-3 bg-[#1e2da7] text-white font-bold rounded-xl hover:bg-[#f06292] transition-all">
+                    Voir l'évènement
+                </button>
+             </Link>
             </div>
           </div>
         ))}

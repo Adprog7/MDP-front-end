@@ -1,0 +1,11 @@
+export const allEvents = [
+  { id: 1, title: "Match OL - PSG", city: "Lyon", countryFlag: "🇫🇷", theme: "Sport", date: "12 Mai 2026", time: "21:00", price: "45€", image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=500" },
+  { id: 2, title: "Festival Lumière", city: "Lyon", countryFlag: "🇫🇷", theme: "Cinéma", date: "15 Mai 2026", time: "19:30", price: "12€", image: "https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=500" },
+  { id: 3, title: "Afterwork Tech", city: "Paris", countryFlag: "🇫🇷", theme: "Networking", date: "18 Mai 2026", time: "18:30", price: "Gratuit", image: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?q=80&w=500" },
+  { id: 4, title: "Concert Jazz", city: "Marseille", countryFlag: "🇫🇷", theme: "Musique", date: "20 Mai 2026", time: "20:00", price: "25€", image: "https://images.unsplash.com/photo-1511192336575-5a79af67a629?q=80&w=500" },
+  { id: 5, title: "Expo Street Art", city: "Lyon", countryFlag: "🇫🇷", theme: "Art", date: "22 Mai 2026", time: "14:00", price: "5€", image: "https://images.unsplash.com/photo-1499781350541-7783f6c6a0c8?q=80&w=500" },
+  { id: 6, title: "Marathon de Paris", city: "Paris", countryFlag: "🇫🇷", theme: "Sport", date: "24 Mai 2026", time: "08:00", price: "80€", image: "https://images.unsplash.com/photo-1452626038306-9aae5e071dd3?q=80&w=500" },
+  { id: 7, title: "Dégustation Vins", city: "Bordeaux", countryFlag: "🇫🇷", theme: "Gastronomie", date: "26 Mai 2026", time: "19:00", price: "35€", image: "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?q=80&w=500" },
+  { id: 8, title: "Soirée Stand-up", city: "Lyon", countryFlag: "🇫🇷", theme: "Loisirs", date: "28 Mai 2026", time: "20:30", price: "15€", image: "https://images.unsplash.com/photo-1514525253361-bee8718a7439?q=80&w=500" },
+  { id: 9, title: "Salon du Design", city: "Milan", countryFlag: "🇮🇹", theme: "Design", date: "02 Juin 2026", time: "10:00", price: "10€", image: "https://images.unsplash.com/photo-1538688525198-9b88f6f53126?q=80&w=500" }
+];
