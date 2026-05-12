@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import Search from './pages/Search';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import EventDetails from './pages/EventDetails'; // 1. Ajout de l'import
 
 function App() {
   // État global de connexion (simulé)
@@ -23,6 +24,9 @@ function App() {
             <Route path="/search" element={<Search />} />
             <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
             <Route path="/register" element={<Register />} />
+            
+            {/* 2. Ajout de la route dynamique pour les détails */}
+            <Route path="/event/:id" element={<EventDetails />} />
           </Routes>
         </main>
         

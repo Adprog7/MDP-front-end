@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Calendar, Clock, Tag, Search as SearchIcon, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const searchResults = [
   { id: 1, title: "Match OL - PSG", city: "Lyon", countryFlag: "🇫🇷", theme: "Sport", date: "12 Mai 2026", time: "21:00", image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=500" },
@@ -83,9 +84,11 @@ const Search = () => {
                 </div>
               </div>
 
-              <button className="w-full py-3 bg-[#1e2da7] text-white font-bold rounded-xl hover:bg-[#f06292] transition-colors">
+              <Link to={`/event/${event.id}`}>
+            <button className="w-full py-3 bg-[#1e2da7] text-white font-bold rounded-xl hover:bg-[#f06292] transition-all">
                 Voir l'évènement
-              </button>
+            </button>
+            </Link>
             </div>
           </div>
         ))}
