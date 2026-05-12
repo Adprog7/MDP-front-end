@@ -11,6 +11,7 @@ import Payment from './pages/Payment';
 import MyTickets from './pages/MyTickets';
 import TicketDetail from './pages/TicketDetail';
 import Settings from './pages/Settings';
+import MentionsLegales from './pages/MentionsLegales';
 
 function App() {
   // État global de connexion (simulé)
@@ -33,6 +34,7 @@ function App() {
             <Route path="/my-tickets" element={<MyTickets />} />
             <Route path="/ticket-detail/:id" element={<TicketDetail />} />
             <Route path="/account" element={<Settings setIsLoggedIn={setIsLoggedIn} />} />
+            <Route path="/mentions-legales" element={<MentionsLegales />} />
           </Routes>
         </main>
         

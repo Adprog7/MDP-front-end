@@ -1,6 +1,6 @@
 import React from 'react';
-// On utilise 'Music' à la place de 'Music2' et 'Share' à la place de 'Share2'
-import { Music, Share, Globe } from 'lucide-react'; 
+import { Link } from 'react-router-dom';
+import { Music, Share, Globe } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -15,6 +15,7 @@ const Footer = () => {
           <p className="text-sm text-blue-100">
             L'étincelle qui déclenche vos expériences collectives.
           </p>
+          
         </div>
 
         {/* Réseaux Sociaux avec icônes sûres */}
@@ -38,10 +39,14 @@ const Footer = () => {
           <h3 className="font-bold mb-4 uppercase text-xs tracking-widest text-blue-200">Légal</h3>
           <ul className="space-y-2 text-sm text-blue-100">
             <li><button className="hover:text-[#f0da50]">Confidentialité (RGPD)</button></li>
+            <Link to="/mentions-legales" className="hover:text-[#f06292] transition-colors">
+            Mentions Légales
+            </Link>
             <li className="pt-2 text-[10px] opacity-70">
               © 2026 SparkUp Events - MDS Lyon
             </li>
           </ul>
+          
         </div>
       </div>
     </footer>
