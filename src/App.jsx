@@ -18,6 +18,7 @@ import PaymentSuccess from './pages/PaymentSuccess';
 import OrganizerAuth from './pages/OrganizerAuth';
 import OrganizerDashboard from './pages/OrganizerDashboard';
 import OrganizerRevenue from './pages/OrganizerRevenue';
+import OrganizerProfile from './pages/OrganizerProfile';
 import OrganizerTickets from './pages/OrganizerTickets';
 import OrganizerEngagement from './pages/OrganizerEngagement';
 import OrganizerEventDetail from './pages/OrganizerEventDetail';
@@ -27,13 +28,14 @@ import OrganizerSupport from './pages/OrganizerSupport';
 
 function App() {
   // État global de connexion (simulé)
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [isOrganizer, setIsOrganizer] = useState(true);
 
   return (
     <Router>
       <div className="flex flex-col min-h-screen bg-gray-50">
         {/* On passe l'état à la Navbar pour changer le texte du bouton */}
-        <Navbar isLoggedIn={isLoggedIn} />
+        <Navbar isLoggedIn={isLoggedIn} isOrganizer={isOrganizer}/>
         
         <main className="flex-grow pb-20 md:pb-0">
           <Routes>
@@ -59,6 +61,7 @@ function App() {
             <Route path="/organizer/create" element={<OrganizerCreateEvent />} />
             <Route path="/organizer/create-success" element={<EventCreationSuccess />} />
             <Route path="/organizer/support" element={<OrganizerSupport />} />
+            <Route path="/organizer/profile" element={<OrganizerProfile />} />
           </Routes>
         </main>
         
