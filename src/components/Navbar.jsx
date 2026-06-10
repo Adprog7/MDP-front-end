@@ -1,5 +1,6 @@
 import React from 'react';
-import { Search, Home, ShieldCheck, UserCircle, MessageSquare, LayoutDashboard, Ticket } from 'lucide-react'; 
+// 🟢 Remplacement de CircleUserRound par User
+import { Search, Home, ShieldCheck, User, MessageSquare, LayoutDashboard, Ticket } from 'lucide-react'; 
 import { Link, useLocation } from 'react-router-dom';
 
 const Navbar = ({ isLoggedIn, isOrganizer }) => {
@@ -9,17 +10,14 @@ const Navbar = ({ isLoggedIn, isOrganizer }) => {
   const navItems = [
     { label: 'Accueil', icon: <Home size={24} />, path: '/' },
     { label: 'Recherche', icon: <Search size={24} />, path: '/search' },
+    { label: 'Mes billets', icon: <Ticket size={24} />, path: '/my-tickets' }, 
   ];
 
-  // 2. Gestion de l'item "Organisateur" ou "Dashboard" (Remis en place pour la cohérence globale)
 
-
-  // 3. Item "Messages" ou "Mes billets"
+  // 3. Item "Messages" (Uniquement si connecté)
   if (isLoggedIn) {
     if (isOrganizer) {
       navItems.push({ label: 'Messages', icon: <MessageSquare size={24} />, path: '/groups' });
-    } else {
-      navItems.push({ label: 'Mes billets', icon: <Ticket size={24} />, path: '/my-tickets' });
     }
   }
 
@@ -32,7 +30,8 @@ const Navbar = ({ isLoggedIn, isOrganizer }) => {
     authPath = isOrganizer ? '/organizer/profile' : '/account'; 
   }
 
-  const authItem = { label: authLabel, icon: <UserCircle size={24} />, path: authPath };
+  // 🟢 Utilisation de l'icône User épurée de ta maquette Figma
+  const authItem = { label: authLabel, icon: <User size={24} />, path: authPath };
   const allItems = [...navItems, authItem];
 
   return (
@@ -60,40 +59,41 @@ const Navbar = ({ isLoggedIn, isOrganizer }) => {
       </nav>
 
       {/* --- VERSION MOBILE --- */}
-<nav className="md:hidden fixed bottom-6 left-4 right-4 bg-white shadow-xl border border-gray-100 z-50 h-16 rounded-full px-1 flex items-center">
-  <div className="flex justify-around items-center h-full w-full">
-    {allItems.map((item, index) => {
-      const isAuthButton = item.path === '/login' || item.path === '/account' || item.path === '/organizer/profile';
-      const displayLabel = isAuthButton ? 'Profil' : item.label;
-      
-      const isActive = location.pathname === item.path;
+      {/* --- VERSION MOBILE --- */}
+      <nav className="md:hidden fixed bottom-6 left-4 right-4 bg-white shadow-xl border border-gray-100 z-50 h-16 rounded-full px-1 flex items-center">
+        <div className="flex justify-around items-center h-full w-full">
+          {allItems.map((item, index) => {
+            const isAuthButton = item.path === '/login' || item.path === '/account' || item.path === '/organizer/profile';
+            const displayLabel = isAuthButton ? 'Profil' : item.label;
+            
+            const isActive = location.pathname === item.path;
 
-      return (
-        <Link 
-          key={index} 
-          to={item.path} 
-          // 🟢 Changement ici : px-6 quand c'est actif pour élargir le fond, et min-w-[90px]
-          className={`flex flex-col items-center justify-center py-1.5 transition-all duration-300 ${
-            isActive 
-              ? 'bg-[#d7c3fa] text-[#8b44f7] rounded-full px-6 min-w-[90px]' 
-              : 'text-gray-800 px-3'
-          }`}
-        >
-          {React.cloneElement(item.icon, { 
-            size: 20, 
-            className: isActive ? 'text-[#8b44f7]' : 'text-gray-800'
+            return (
+              <Link 
+                key={index} 
+                to={item.path} 
+                // 🟢 Augmentation ici : px-8 et min-w-[100px] pour un fond plus large
+                className={`flex flex-col items-center justify-center py-1.5 transition-all duration-300 ${
+                  isActive 
+                    ? 'bg-[#d7c3fa] text-[#8b44f7] rounded-full px-8 min-w-[100px]' 
+                    : 'text-gray-800 px-2'
+                }`}
+              >
+                {React.cloneElement(item.icon, { 
+                  size: 20, 
+                  className: isActive ? 'text-[#8b44f7]' : 'text-gray-800'
+                })}
+                
+                <span className={`text-[9px] mt-0.5 font-bold text-center truncate tracking-wide ${
+                  isActive ? 'text-[#8b44f7]' : 'text-gray-800'
+                }`}>
+                  {displayLabel}
+                </span>
+              </Link>
+            );
           })}
-          
-          <span className={`text-[9px] mt-0.5 font-bold text-center truncate tracking-wide ${
-            isActive ? 'text-[#8b44f7]' : 'text-gray-800'
-          }`}>
-            {displayLabel}
-          </span>
-        </Link>
-      );
-    })}
-  </div>
-</nav>
+        </div>
+      </nav>
     </>
   );
 };
