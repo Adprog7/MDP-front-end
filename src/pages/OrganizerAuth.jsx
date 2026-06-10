@@ -1,16 +1,28 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { LayoutDashboard, Mail, Lock, User, ArrowRight, Building2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Mail, Lock, User, ArrowRight, Building2 } from 'lucide-react';
 
-const OrganizerAuth = () => {
-  const [isLogin, setIsLogin] = useState(true);
-  const navigate = useNavigate();
+const OrganizerAuth = ({ setIsLoggedIn, setIsOrganizer }) => {
+  const navigate = useNavigate(); 
+
+  const [isLogin, setIsLogin] = useState(true); 
+
+  const handleLoginSuccess = () => {
+    setIsLoggedIn(true);
+    setIsOrganizer(true);
+    
+    localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('isOrganizer', 'true');
+    
+    navigate('/organizer/dashboard');
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Ici tu ajouteras ta logique Firebase ou API plus tard
-    // Pour l'instant, on simule la réussite vers le dashboard
-    navigate('/organizer/dashboard');
+    
+    // Ici tu mettras ta logique d'appel API plus tard
+    // Pour l'instant, on déclenche directement la simulation de succès
+    handleLoginSuccess();
   };
 
   return (

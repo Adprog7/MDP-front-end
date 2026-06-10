@@ -28,8 +28,8 @@ import OrganizerSupport from './pages/OrganizerSupport';
 
 function App() {
   // État global de connexion (simulé)
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
-  const [isOrganizer, setIsOrganizer] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isOrganizer, setIsOrganizer] = useState(false);
 
   return (
     <Router>
@@ -52,7 +52,7 @@ function App() {
             <Route path="/groups" element={<GroupsList />} />
             <Route path="/chat/:id" element={<ChatView />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
-            <Route path="/organizer/login" element={<OrganizerAuth />} />
+            <Route path="/organizer/login" element={<OrganizerAuth setIsLoggedIn={setIsLoggedIn} setIsOrganizer={setIsOrganizer} />} />
             <Route path="/organizer/dashboard" element={<OrganizerDashboard />} />
             <Route path="/organizer/stats/revenue" element={<OrganizerRevenue />} />
             <Route path="/organizer/stats/tickets" element={<OrganizerTickets />} />
