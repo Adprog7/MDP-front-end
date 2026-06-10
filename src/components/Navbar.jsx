@@ -1,7 +1,8 @@
 import React from 'react';
-// 🟢 Remplacement de CircleUserRound par User
 import { Search, Home, ShieldCheck, User, MessageSquare, LayoutDashboard, Ticket } from 'lucide-react'; 
 import { Link, useLocation } from 'react-router-dom';
+// 🟢 Import de ton nouveau fichier SVG
+import logoSvg from '../assets/spark-up-header.svg'; 
 
 const Navbar = ({ isLoggedIn, isOrganizer }) => {
   const location = useLocation();
@@ -30,7 +31,6 @@ const Navbar = ({ isLoggedIn, isOrganizer }) => {
     authPath = isOrganizer ? '/organizer/profile' : '/account'; 
   }
 
-  // 🟢 Utilisation de l'icône User épurée de ta maquette Figma
   const authItem = { label: authLabel, icon: <User size={24} />, path: authPath };
   const allItems = [...navItems, authItem];
 
@@ -39,8 +39,9 @@ const Navbar = ({ isLoggedIn, isOrganizer }) => {
       {/* --- VERSION BUREAU --- */}
       <nav className="hidden md:flex items-center justify-center px-10 py-4 bg-white border-b border-gray-100 sticky top-0 z-50">
         <div className="flex items-center justify-between w-full max-w-6xl">
-          <Link to="/" className="font-black text-2xl tracking-tighter text-[#1e2da7]">
-            SPARK<span className="text-[#f06292]">UP</span>
+          {/* 🟢 Utilisation du SVG aussi sur la version bureau pour garder la même charte graphique */}
+          <Link to="/" className="flex items-center">
+            <img src={logoSvg} alt="SparkUp" className="h-7 w-auto object-contain" />
           </Link>
           
           <div className="flex justify-center gap-8 flex-1">
@@ -59,7 +60,6 @@ const Navbar = ({ isLoggedIn, isOrganizer }) => {
       </nav>
 
       {/* --- VERSION MOBILE --- */}
-      {/* --- VERSION MOBILE --- */}
       <nav className="md:hidden fixed bottom-6 left-4 right-4 bg-white shadow-xl border border-gray-100 z-50 h-16 rounded-full px-1 flex items-center">
         <div className="flex justify-around items-center h-full w-full">
           {allItems.map((item, index) => {
@@ -72,7 +72,6 @@ const Navbar = ({ isLoggedIn, isOrganizer }) => {
               <Link 
                 key={index} 
                 to={item.path} 
-                // 🟢 Augmentation ici : px-8 et min-w-[100px] pour un fond plus large
                 className={`flex flex-col items-center justify-center py-1.5 transition-all duration-300 ${
                   isActive 
                     ? 'bg-[#d7c3fa] text-[#8b44f7] rounded-full px-8 min-w-[100px]' 
