@@ -1,7 +1,6 @@
 import React from 'react';
 import { Search, Home, ShieldCheck, User, MessageSquare, LayoutDashboard, Ticket } from 'lucide-react'; 
 import { Link, useLocation } from 'react-router-dom';
-// 🟢 Import de ton nouveau fichier SVG
 import logoSvg from '../assets/spark-up-header.svg'; 
 
 const Navbar = ({ isLoggedIn, isOrganizer }) => {
