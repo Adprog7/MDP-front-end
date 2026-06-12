@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { MapPin, Search, X, Heart, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-// Importation de tes fichiers SVG personnalisés depuis le dossier assets
 import toutIcon from '../assets/tout.svg';
 import toutActifIcon from '../assets/tout-actif.svg';
 import concertsIcon from '../assets/concerts.svg';
@@ -17,7 +16,6 @@ import plusIcon from '../assets/plus.svg';
 import plusActifIcon from '../assets/plus-actif.svg';
 import starIcon from '../assets/star.svg';
 import organisateursBanniere from '../assets/organisateurs_bannière.svg';
-// 🟢 Import de ton nouveau SVG pour la date
 import encadreDateSvg from '../assets/encadre-evenement-date.svg';
 
 const eventsData = [
