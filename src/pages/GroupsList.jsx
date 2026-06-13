@@ -1,69 +1,109 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { MessageSquare, Users, ChevronRight, Search } from 'lucide-react';
+import { Search, SquarePen } from 'lucide-react';
+
+// Import de ton bouton retour personnalisé
+import boutonRetourSvg from '../assets/bouton-retour.svg';
 
 const GroupsList = () => {
-  // Mock data pour tes groupes
-  const myGroups = [
-    { id: 1, name: "La commu OL", event: "OL - PSG", lastMsg: "On se rejoint devant la porte A ?", time: "14:30", unread: 3, image: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=200&auto=format&fit=crop" },
-    { id: 2, name: "Team Techno", event: "Nuits Sonores", lastMsg: "Quelqu'un a pris les pass ?", time: "Hier", unread: 0, image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=200&auto=format&fit=crop" },
-    { id: 3, name: "Les Lyonnais", event: "Fête des Lumières", lastMsg: "Rdv Place Bellecour !", time: "Mar.", unread: 0, image: "https://images.unsplash.com/photo-1514525253361-b83f85f051c0?q=80&w=200&auto=format&fit=crop" },
+  const navigate = useNavigate();
+
+  // Nouvelles données calquées sur ta maquette (avec nom et PP modifiés)
+  const myMessages = [
+    { 
+      id: 1, 
+      name: "Thomas.mrt", 
+      lastMsg: "Envoyé il y a 1h", 
+      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop" 
+    },
+    { 
+      id: 2, 
+      name: "Killian", 
+      lastMsg: "Envoyé il y a 2h", 
+      image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200&auto=format&fit=crop" 
+    },
+    { 
+      id: 3, 
+      name: "Groupe soirée After School", 
+      lastMsg: "Killian: Vous pouvez me prendre ma place ? · 1h", 
+      image: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=200&auto=format&fit=crop" 
+    },
   ];
 
   return (
-    <div className="max-w-2xl mx-auto p-6 mb-20">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-black text-[#1e2da7] uppercase tracking-tighter">Mes Groupes</h1>
-          <p className="text-gray-500 font-medium">Tes discussions d'évènements</p>
-        </div>
-        <div className="bg-blue-50 p-3 rounded-2xl text-[#1e2da7]">
-          <MessageSquare size={28} />
+    <div className="min-h-screen bg-[#FDFBF7] font-sans antialiased relative overflow-hidden pb-28">
+      
+      {/* ─── HALOS DE FOND ─── */}
+      <div className="absolute top-0 left-0 right-0 h-[500px] pointer-events-none z-0">
+        <div className="absolute -top-10 -left-10 w-80 h-80 bg-[#FFF9C4]/60 rounded-full blur-[80px]" />
+        <div className="absolute -top-10 -right-10 w-96 h-96 bg-[#DBCDF8]/50 rounded-full blur-[80px]" />
+      </div>
+
+      {/* ─── HEADER (Bouton Retour & Nouveau Message) ─── */}
+      <div className="relative z-10 flex justify-between items-center px-5 pt-6 pb-2">
+        <button
+          onClick={() => navigate(-1)}
+          className="active:scale-95 transition-transform w-11 h-11 bg-white rounded-full flex items-center justify-center shadow-[0_2px_10px_rgba(0,0,0,0.04)]"
+        >
+          <img
+            src={boutonRetourSvg}
+            alt="Retour"
+            className="w-11 h-11 object-contain"
+          />
+        </button>
+
+        <button className="active:scale-95 transition-transform w-11 h-11 bg-white rounded-full flex items-center justify-center shadow-[0_2px_10px_rgba(0,0,0,0.04)]">
+          <SquarePen size={22} className="text-gray-900" strokeWidth={2.5} />
+        </button>
+      </div>
+
+      {/* ─── BARRE DE RECHERCHE ─── */}
+      <div className="relative z-10 px-5 mt-4 mb-8">
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} strokeWidth={2.5} />
+          <input 
+            type="text" 
+            placeholder="Rechercher des amis ou un groupe" 
+            className="w-full pl-11 pr-4 py-3.5 bg-white border-none rounded-[20px] shadow-[0_2px_15px_rgba(0,0,0,0.03)] outline-none focus:ring-2 focus:ring-[#8b44f7]/20 transition-all text-[13px] font-medium placeholder:text-gray-400"
+          />
         </div>
       </div>
 
-      {/* Barre de recherche locale */}
-      <div className="relative mb-8">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-        <input 
-          type="text" 
-          placeholder="Rechercher un groupe..." 
-          className="w-full pl-12 pr-6 py-4 bg-white border border-gray-100 rounded-2xl shadow-sm focus:ring-2 focus:ring-[#1e2da7] outline-none transition-all"
-        />
+      {/* ─── TITRE ─── */}
+      <div className="relative z-10 px-5 mb-6">
+        <h1 className="text-[26px] font-black text-gray-900 tracking-tight leading-none">
+          Messages
+        </h1>
       </div>
 
-      {/* Liste des conversations */}
-      <div className="space-y-4">
-        {myGroups.map((group) => (
+      {/* ─── LISTE DES MESSAGES ─── */}
+      <div className="relative z-10 px-5 flex flex-col gap-6">
+        {myMessages.map((msg) => (
           <Link 
-            key={group.id} 
-            to={`/chat/${group.id}`}
-            className="flex items-center gap-4 bg-white p-4 rounded-[2rem] border border-gray-50 shadow-sm hover:shadow-md hover:translate-x-1 transition-all group"
+            key={msg.id} 
+            to={`/chat/${msg.id}`}
+            className="flex items-center gap-4 active:scale-[0.98] transition-transform"
           >
-            {/* Avatar du groupe */}
-            <div className="relative">
-              <img src={group.image} alt="" className="w-16 h-16 rounded-2xl object-cover" />
-              {group.unread > 0 && (
-                <span className="absolute -top-1 -right-1 bg-[#f06292] text-white text-[10px] font-bold w-6 h-6 flex items-center justify-center rounded-full border-2 border-white">
-                  {group.unread}
-                </span>
-              )}
+            {/* Avatar */}
+            <img 
+              src={msg.image} 
+              alt={msg.name} 
+              className="w-[60px] h-[60px] rounded-full object-cover shadow-sm shrink-0" 
+            />
+            
+            {/* Textes */}
+            <div className="flex flex-col justify-center min-w-0">
+              <h3 className="text-[15px] font-black text-gray-900 truncate leading-tight mb-0.5">
+                {msg.name}
+              </h3>
+              <p className="text-[13px] text-gray-500 font-medium truncate">
+                {msg.lastMsg}
+              </p>
             </div>
-
-            {/* Détails du message */}
-            <div className="flex-grow min-w-0">
-              <div className="flex justify-between items-start mb-1">
-                <h3 className="font-black text-[#1e2da7] truncate uppercase text-sm tracking-tight">{group.name}</h3>
-                <span className="text-[10px] text-gray-400 font-bold">{group.time}</span>
-              </div>
-              <p className="text-xs text-gray-400 font-bold mb-1 uppercase tracking-widest">{group.event}</p>
-              <p className="text-sm text-gray-600 truncate">{group.lastMsg}</p>
-            </div>
-
-            <ChevronRight size={20} className="text-gray-200 group-hover:text-[#1e2da7] transition-colors" />
           </Link>
         ))}
       </div>
+
     </div>
   );
 };

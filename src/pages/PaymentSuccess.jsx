@@ -1,82 +1,58 @@
 import React, { useEffect } from 'react';
-import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { CheckCircle2, Ticket, MessageSquare, ArrowRight, PartyPopper } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+// 1. On décommente et on importe correctement l'image
+// Assure-toi que le nom "ticket-success-paiement.svg" est exactement le bon
+import ticketsSvg from '../assets/ticket-succes-paiement.svg';
 
 const PaymentSuccess = () => {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const count = searchParams.get('count') || 1;
-
-  // Petit effet au chargement pour simuler la réussite
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   return (
-    <div className="min-h-[calc(100vh-80px)] flex items-center justify-center p-6 bg-[#f8f9fe]">
-      <div className="max-w-md w-full bg-white rounded-[3rem] shadow-2xl p-8 text-center border border-gray-50 relative overflow-hidden">
+    <div className="min-h-screen bg-[#FDFBF7] font-sans antialiased relative overflow-hidden flex flex-col items-center justify-center p-6">
+      
+      {/* ─── HALOS (pour le fond violet/jaune) ─── */}
+      <div className="absolute top-0 left-0 right-0 h-[500px] pointer-events-none z-0">
+        <div className="absolute top-10 left-10 w-72 h-72 bg-[#FFF9C4]/60 rounded-full blur-3xl" />
+        <div className="absolute -top-10 -right-10 w-80 h-80 bg-purple-200/50 rounded-full blur-3xl" />
+      </div>
+
+      <div className="relative z-10 w-full max-w-sm mx-auto flex flex-col items-center text-center">
         
-        {/* Déco de fond discrète */}
-        <div className="absolute top-0 right-0 p-4 opacity-10 text-[#f06292]">
-          <PartyPopper size={120} />
-        </div>
+        {/* ─── L'IMAGE DES TICKETS ─── */}
+        <img 
+          src={ticketsSvg} 
+          alt="Tickets de réussite" 
+          className="w-full max-w-[280px] h-auto mb-10 object-contain drop-shadow-sm"
+        />
 
-        {/* --- ICONE SUCCESS --- */}
-        <div className="flex justify-center mb-6">
-          <div className="bg-green-100 p-4 rounded-full animate-bounce">
-            <CheckCircle2 size={60} className="text-green-500" />
-          </div>
-        </div>
-
-        {/* --- TEXTE PRINCIPAL --- */}
-        <h1 className="text-3xl font-black text-[#1e2da7] uppercase tracking-tighter mb-2">
-          Paiement Confirmé !
+        {/* ─── TITRE ─── */}
+        <h1 className="text-2xl font-black text-gray-900 mb-4 tracking-tight">
+          🥳 Vous êtes de la partie !
         </h1>
-        <p className="text-gray-500 font-medium mb-8">
-          Tes <span className="text-[#1e2da7] font-bold">{count} billets</span> sont maintenant disponibles dans ton wallet.
+
+        {/* ─── SOUS-TITRE VIOLET ─── */}
+        <p className="text-base font-bold text-[#8b44f7] mb-6">
+          Votre achat a bien été pris en compte.
         </p>
 
-        {/* --- RÉCAPITULATIF --- */}
-        <div className="bg-blue-50 rounded-3xl p-6 mb-8 text-left border border-blue-100">
-          <div className="flex justify-between items-center mb-4">
-            <span className="text-xs font-black text-[#1e2da7] uppercase">Statut</span>
-            <span className="bg-green-500 text-white text-[10px] font-black px-3 py-1 rounded-full">VALIDE</span>
-          </div>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-400 font-bold">Transaction</span>
-              <span className="text-[#1e2da7] font-mono">#SPK-772933</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-400 font-bold">Total payé</span>
-              <span className="text-[#1e2da7] font-black">{count * 35}€</span>
-            </div>
-          </div>
-        </div>
+        {/* ─── TEXTE DESCRIPTIF ─── */}
+        <p className="text-sm font-medium text-gray-500 mb-10 leading-relaxed px-2">
+          Retrouvez vos billets à tout moment<br />
+          dans la rubrique Mes billets<br />
+          et préparez-vous pour votre prochain événement.
+        </p>
 
-        {/* --- ACTIONS --- */}
-        <div className="space-y-4">
-          <Link 
-            to="/my-tickets" 
-            className="w-full bg-[#1e2da7] text-white py-5 rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-3 shadow-lg shadow-blue-200 hover:scale-[1.02] transition-all"
-          >
-            <Ticket size={20} /> Voir mes billets
-          </Link>
-
-          <Link 
-            to="/groups" 
-            className="w-full bg-white border-2 border-[#1e2da7] text-[#1e2da7] py-5 rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-blue-50 transition-all"
-          >
-            <MessageSquare size={20} /> Retour au chat
-          </Link>
-        </div>
-
-        <button 
-          onClick={() => navigate('/')}
-          className="mt-8 text-gray-400 text-xs font-black uppercase tracking-widest hover:text-[#f06292] transition-colors inline-flex items-center gap-2"
+        {/* ─── BOUTON ─── */}
+        <Link 
+          to="/my-tickets" 
+          className="w-fit px-8 py-3.5 bg-[#E8DBFA] text-[#8b44f7] rounded-xl font-bold text-[11px] uppercase tracking-wider active:scale-95 transition-transform"
         >
-          Retour à l'accueil <ArrowRight size={14} />
-        </button>
+          Voir mes billets
+        </Link>
+
       </div>
     </div>
   );

@@ -1,125 +1,129 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Send, CreditCard, Check, X } from 'lucide-react';
-import { allEvents } from '../data/events';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ChevronLeft, ChevronRight, Camera, Mic, Plus } from 'lucide-react';
 
 const ChatView = () => {
-  const { id } = useParams();
   const navigate = useNavigate();
-  const [showPayMenu, setShowPayMenu] = useState(false);
-  
-  const messages = [
-    { id: 1, user: "Lucas", text: "Salut l'équipe ! On est combien pour le match ?", time: "14:02", isMe: false, avatar: "https://i.pravatar.cc/150?u=lucas" },
-    { id: 2, user: "Moi", text: "On est 4 normalement. J'ai vu qu'il restait des places en tribune Nord.", time: "14:05", isMe: true },
-    { id: 3, user: "Sarah", text: "Top ! Adrien, tu peux t'occuper de prendre les billets pour tout le monde ? On te rembourse après !", time: "14:06", isMe: false, avatar: "https://i.pravatar.cc/150?u=sarah" },
-  ];
 
-  const [members, setMembers] = useState([
-    { id: 'me', name: "Moi", avatar: "https://i.pravatar.cc/150?u=adrien", selected: true },
-    { id: 1, name: "Lucas", avatar: "https://i.pravatar.cc/150?u=lucas", selected: false },
-    { id: 2, name: "Sarah", avatar: "https://i.pravatar.cc/150?u=sarah", selected: false },
-    { id: 3, name: "Hugo", avatar: "https://i.pravatar.cc/150?u=hugo", selected: false },
-  ]);
-
-  const toggleMember = (memberId) => {
-    setMembers(members.map(m => m.id === memberId ? { ...m, selected: !m.selected } : m));
-  };
-
-  const selectedCount = members.filter(m => m.selected).length;
-  const event = allEvents.find(e => e.id === parseInt(id));
-  const pricePerTicket = event ? parseInt(event.price) : 0;
+  // Photo de profil factice pour Killian
+  const profilePic = "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200&auto=format&fit=crop";
 
   return (
-    /* MODIFICATION ICI :
-       - On applique m-3 (marge) et rounded-[2.5rem] (gros arrondis) pour TOUTES les vues.
-       - h-[calc(100vh-120px)] : On réduit encore un peu la hauteur pour laisser respirer les marges.
-    */
-    <div className="flex flex-col h-[calc(100vh-130px)] md:h-[calc(100vh-100px)] bg-gray-50 max-w-2xl mx-auto relative overflow-hidden shadow-2xl m-3 rounded-[2.5rem] border border-gray-100">
+    <div className="min-h-screen bg-[#FDFBF7] font-sans antialiased relative overflow-hidden flex flex-col">
       
-      {/* --- HEADER --- */}
-      <div className="bg-white p-5 border-b border-gray-50 flex items-center gap-4 sticky top-0 z-10">
-        <button onClick={() => navigate('/groups')} className="text-gray-400 hover:text-[#1e2da7] transition-colors">
-          <ArrowLeft size={24} />
+      {/* ─── HALOS DE FOND ─── */}
+      <div className="absolute top-0 left-0 right-0 h-full pointer-events-none z-0">
+        <div className="absolute top-60 -left-20 w-96 h-96 bg-[#FFF9C4]/50 rounded-full blur-[80px]" />
+        <div className="absolute top-20 -right-20 w-[400px] h-[400px] bg-[#DBCDF8]/50 rounded-full blur-[80px]" />
+      </div>
+
+      {/* ─── HEADER ─── */}
+      <div className="relative z-10 flex items-center gap-4 px-5 pt-6 pb-2">
+        <button
+          onClick={() => navigate(-1)}
+          className="active:scale-95 transition-transform w-11 h-11 bg-white rounded-full flex items-center justify-center shadow-[0_2px_10px_rgba(0,0,0,0.04)] shrink-0"
+        >
+          <ChevronLeft size={24} className="text-gray-900" strokeWidth={2.5} />
         </button>
-        <div>
-          <h1 className="font-black text-[#1e2da7] uppercase text-xs tracking-tighter">La commu OL</h1>
-          <p className="text-[9px] text-green-500 font-bold uppercase tracking-widest">En ligne</p>
+        
+        <div className="flex items-center gap-3">
+          <img src={profilePic} alt="Killian" className="w-10 h-10 rounded-full object-cover shadow-sm" />
+          <div className="flex flex-col">
+            <div className="flex items-center gap-1">
+              <span className="font-black text-gray-900 text-[15px] leading-none">Killian</span>
+              <ChevronRight size={14} className="text-gray-400" strokeWidth={3} />
+            </div>
+            <span className="text-[11px] text-gray-500 font-medium mt-0.5">kiki.pt06200</span>
+          </div>
         </div>
       </div>
 
-      {/* --- ZONE DE MESSAGES --- */}
-      <div className="flex-grow p-6 overflow-y-auto space-y-4 bg-[#f8f9fe]">
-        {messages.map((msg) => (
-          <div key={msg.id} className={`flex ${msg.isMe ? 'justify-end' : 'justify-start'} items-end gap-2`}>
-            {!msg.isMe && <img src={msg.avatar} alt="" className="w-8 h-8 rounded-full mb-1 border border-gray-100" />}
-            <div className={`max-w-[75%] flex flex-col ${msg.isMe ? 'items-end' : 'items-start'}`}>
-              {!msg.isMe && <span className="text-[10px] font-black text-gray-400 ml-2 mb-1 uppercase tracking-wider">{msg.user}</span>}
-              <div className={`p-4 rounded-[1.8rem] text-sm font-medium shadow-sm ${msg.isMe ? 'bg-[#1e2da7] text-white rounded-br-none' : 'bg-white text-gray-700 rounded-bl-none border border-gray-100'}`}>
-                {msg.text}
+      {/* ─── ZONE DE CHAT ─── */}
+      <div className="relative z-10 flex-grow px-5 overflow-y-auto pb-6 scrollbar-none" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        
+        {/* Profil central (Haut de la conversation) */}
+        <div className="flex flex-col items-center mt-8 mb-10">
+          <img src={profilePic} alt="Killian" className="w-24 h-24 rounded-full object-cover shadow-sm mb-3" />
+          <h2 className="text-xl font-black text-gray-900 leading-tight">Killian</h2>
+          <p className="text-[13px] text-gray-500 font-medium">kiki.pt06200</p>
+        </div>
+
+        {/* Liste des Messages */}
+        <div className="flex flex-col gap-3">
+          
+          {/* Message Autre (Killian) */}
+          <div className="flex items-end gap-2">
+            <img src={profilePic} alt="Killian" className="w-7 h-7 rounded-full object-cover shrink-0 shadow-sm" />
+            <div className="bg-[#8b44f7] text-white px-4 py-3 rounded-[20px] rounded-bl-sm max-w-[75%] shadow-[0_2px_10px_rgba(139,68,247,0.15)]">
+              <p className="text-[13px] font-medium leading-snug">
+                Slt frérot, ouais je te prends les places pas
+              </p>
+            </div>
+          </div>
+
+          {/* Message Moi (Texte simple) */}
+          <div className="flex justify-end mt-2">
+            <div className="bg-white border border-gray-100 text-gray-800 px-4 py-3 rounded-[20px] rounded-br-sm max-w-[75%] shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+              <p className="text-[13px] font-medium leading-snug">
+                Slt frérot, ouais je te prends les places pas de soucis
+              </p>
+            </div>
+          </div>
+
+          {/* Message Moi (Billet partagé) */}
+          <div className="flex justify-end">
+            <div className="bg-white border border-gray-100 rounded-[20px] rounded-br-sm p-3 max-w-[85%] shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+              <p className="text-[12px] font-medium text-gray-800 mb-2.5 leading-snug px-1">
+                Ceci est le billet pour : Soirée After School pour killian.
+              </p>
+              
+              {/* Carte du billet flouté */}
+              <div className="relative h-56 bg-gray-50 rounded-xl overflow-hidden flex items-center justify-center border border-gray-100">
+                {/* Image de fond très floutée pour simuler le QR/Billet */}
+                <img 
+                  src="https://images.unsplash.com/photo-1540039155732-6847368222a0?q=80&w=300&auto=format&fit=crop" 
+                  alt="Billet" 
+                  className="absolute inset-0 w-full h-full object-cover blur-xl opacity-30 grayscale"
+                />
+                
+                {/* Carré simulé de QR Code flou au centre */}
+                <div className="absolute w-32 h-32 bg-gray-300/40 rounded-lg blur-[3px]" />
+
+                {/* Bouton d'action */}
+                <button className="relative z-10 bg-[#E8DBFA] text-[#8b44f7] px-5 py-2.5 rounded-xl font-bold text-[11px] active:scale-95 transition-transform shadow-sm">
+                  Vérifier mon billet
+                </button>
               </div>
             </div>
           </div>
-        ))}
+
+        </div>
       </div>
 
-      {/* --- TIROIR DE PAIEMENT --- */}
-      <div 
-        className={`absolute inset-0 bg-black/40 transition-opacity z-20 ${showPayMenu ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-        onClick={() => setShowPayMenu(false)}
-      />
-      
-      <div className={`absolute inset-x-0 bottom-0 bg-white rounded-t-[3rem] shadow-2xl transition-transform duration-500 z-30 ${showPayMenu ? 'translate-y-0' : 'translate-y-full'}`}>
-        <div className="p-8 pb-10">
-          <div className="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-6" />
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="font-black text-[#1e2da7] uppercase tracking-tighter text-xl italic">Check-out Groupe</h2>
-            <button onClick={() => setShowPayMenu(false)} className="bg-gray-100 p-2 rounded-full text-gray-400"><X size={20}/></button>
-          </div>
+      {/* ─── BARRE D'ENTRÉE (FIXE EN BAS) ─── */}
+      <div className="relative z-20 bg-[#FDFBF7] px-4 py-3 flex items-center gap-3">
+        <button className="w-[38px] h-[38px] bg-[#8b44f7] rounded-full flex items-center justify-center shrink-0 active:scale-95 transition-transform shadow-[0_2px_8px_rgba(139,68,247,0.3)]">
+          <Camera size={18} className="text-white" strokeWidth={2.5} />
+        </button>
+        
+        <div className="flex-grow bg-white border border-gray-100 rounded-full px-4 py-3 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex items-center">
+          <input 
+            type="text"
+            placeholder="Message..."
+            className="w-full bg-transparent outline-none text-[14px] font-medium text-gray-800 placeholder:text-gray-400"
+          />
+        </div>
 
-          <div className="space-y-3 max-h-52 overflow-y-auto mb-8 pr-2">
-            {members.map(member => (
-              <div 
-                key={member.id}
-                onClick={() => toggleMember(member.id)}
-                className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-all cursor-pointer ${member.selected ? 'border-[#1e2da7] bg-blue-50' : 'border-gray-50 bg-white hover:border-gray-200'}`}
-              >
-                <div className="flex items-center gap-4">
-                  <img src={member.avatar} alt="" className="w-10 h-10 rounded-full border-2 border-white shadow-sm" />
-                  <span className={`font-bold ${member.selected ? 'text-[#1e2da7]' : 'text-gray-600'}`}>{member.name}</span>
-                </div>
-                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${member.selected ? 'bg-[#1e2da7] border-[#1e2da7]' : 'border-gray-200'}`}>
-                  {member.selected && <Check size={14} className="text-white" />}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <button 
-            onClick={() => navigate(`/payment/${id}?count=${selectedCount}`)}
-            className="w-full py-5 bg-[#1e2da7] text-white rounded-[1.5rem] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-transform"
-          >
-            Confirmer {selectedCount * pricePerTicket}€
+        <div className="flex items-center gap-3 shrink-0 text-gray-500">
+          <button className="active:scale-95 transition-transform">
+            <Mic size={22} strokeWidth={2.5} />
+          </button>
+          <button className="active:scale-95 transition-transform">
+            <Plus size={26} strokeWidth={2.5} />
           </button>
         </div>
       </div>
 
-      {/* --- BARRE D'ENTRÉE --- */}
-      <div className="bg-white p-4 border-t border-gray-50 flex items-center gap-3 sticky bottom-0">
-        <button 
-          onClick={() => setShowPayMenu(true)}
-          className="p-3 bg-[#f06292] text-white rounded-2xl shadow-lg hover:scale-105 active:scale-95 transition-all"
-        >
-          <CreditCard size={24} />
-        </button>
-        <input 
-          type="text" 
-          placeholder="Message..." 
-          className="flex-grow bg-gray-50 border-none rounded-2xl px-4 py-3 outline-none text-sm" 
-        />
-        <button className="bg-[#1e2da7] text-white p-3 rounded-2xl hover:bg-blue-800">
-          <Send size={24} />
-        </button>
-      </div>
     </div>
   );
 };

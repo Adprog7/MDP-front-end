@@ -184,7 +184,7 @@ const EventDetails = () => {
 
       {/* ─── BARRE DE RÉSERVATION FIXE EN BAS ─── */}
       <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-transparent px-5 pb-6 pt-2 z-40 pointer-events-none">
-        <Link to={`/payment/${event.id}`} className="block w-full pointer-events-auto">
+        <Link to={`/tickets/${event.id}`} className="block w-full pointer-events-auto">
           <button className="w-full h-14 bg-[#8b44f7] text-white font-medium text-xs rounded-2xl active:scale-[0.98] transition-all flex items-center justify-between px-6 shadow-lg shadow-purple-200/40 uppercase tracking-wider">
             
             <div className="flex items-center gap-3">

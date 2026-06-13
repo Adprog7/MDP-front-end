@@ -22,7 +22,7 @@ const HeaderMobile = () => {
         
         {/* Bouton Favoris (Cœur) */}
         <Link 
-          to="/favorites" 
+          to="/notifications" 
           className="relative w-11 h-11 bg-white rounded-2xl shadow-sm flex items-center justify-center border border-gray-100/40 active:scale-95 transition-all"
         >
           <Heart size={20} className="text-gray-900" />
