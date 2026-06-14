@@ -53,7 +53,7 @@ function AppContent() {
   const isSettingsPage = location.pathname.startsWith('/settings');
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#FDFBF7] max-w-md mx-auto font-sans antialiased relative overflow-hidden">
+    <div className="flex flex-col min-h-screen bg-[#FDFBF7] w-full font-sans antialiased relative overflow-hidden">
       
       {/* ─── HALOS FLOUES DE DÉGRADÉ ─── */}
       <div className="absolute top-0 left-0 right-0 h-96 pointer-events-none z-0 overflow-hidden">
@@ -97,7 +97,6 @@ function AppContent() {
           <Route path="/organizer/profile" element={<OrganizerProfile />} />
           <Route path="/tickets/:id" element={<TicketCount />} />
           <Route path="/notifications" element={<Notifications />} />
-          <Route path="/settings" element={<Settings setIsLoggedIn={setIsLoggedIn} />} />
         </Routes>
       </main>
     </div>
