@@ -1,85 +1,76 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Ticket, Calendar, MapPin, ArrowRight, QrCode, ArrowLeft } from 'lucide-react';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { allEvents } from '../data/events';
 
 const MyTickets = () => {
-  const navigate = useNavigate(); // Initialise le hook
+  const [activeTab, setActiveTab] = useState('À venir');
+  const tabs = ['À venir', 'En attente', 'Passés'];
+
+  // Simulation des billets achetés
   const purchasedIds = [1, 3, 5];
   const myTickets = allEvents.filter(event => purchasedIds.includes(event.id));
 
   return (
-    <div className="max-w-4xl mx-auto p-6 mb-20">
-      <button 
-        onClick={() => navigate('/account')} // On remplace -1 par le chemin exact
-        className="flex items-center gap-2 text-gray-500 hover:text-[#1e2da7] mb-6 transition-colors font-semibold"
-      >
-        <ArrowLeft size={20} /> Retour au compte
-      </button>
-      <div className="flex items-center gap-4 mb-10">
-        <div className="bg-[#1e2da7] p-3 rounded-2xl text-white shadow-lg shadow-blue-100">
-          <Ticket size={32} />
-        </div>
-        <div>
-          <h1 className="text-3xl font-black text-[#1e2da7] uppercase tracking-tighter">Mes Billets</h1>
-          <p className="text-gray-500 font-medium">Retrouvez toutes vos réservations SparkUp.</p>
-        </div>
+    <div className="pt-10 px-5 pb-24 relative z-10">
+      
+      {/* ─── TITRE ─── */}
+      <h1 className="text-[40px] leading-none font-black uppercase tracking-tight text-gray-900 mb-8">
+        Mes Billets
+      </h1>
+
+      {/* ─── TABS / FILTRES ─── */}
+      <div className="flex items-center bg-white rounded-full p-1.5 mb-8 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+        {tabs.map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`flex-1 text-center py-2.5 rounded-full text-xs font-bold transition-all ${
+              activeTab === tab
+                ? 'bg-[#E8DBFA] text-[#8b44f7]'
+                : 'text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
       </div>
 
-      <div className="space-y-6">
+      {/* ─── LISTE DES BILLETS ─── */}
+      <div className="flex flex-col gap-4">
         {myTickets.length > 0 ? (
           myTickets.map(ticket => (
-            <div key={ticket.id} className="bg-white rounded-[2rem] shadow-md border border-gray-100 overflow-hidden flex flex-col md:flex-row hover:shadow-xl transition-all group">
-              {/* Image / Thumbnail */}
-              <div className="md:w-48 h-40 md:h-auto relative">
-                <img src={ticket.image} alt="" className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-[#1e2da7]/10 group-hover:bg-transparent transition-colors"></div>
-              </div>
-
-              {/* Infos */}
-              <div className="flex-grow p-6 flex flex-col justify-between">
-                <div>
-                  <div className="flex justify-between items-start mb-2">
-                    <span className="text-xs font-black text-[#f06292] uppercase tracking-widest">{ticket.theme}</span>
-                    <span className="bg-green-100 text-green-600 text-[10px] font-bold px-2 py-1 rounded-full uppercase">Confirmé</span>
-                  </div>
-                  <h3 className="text-xl font-black text-[#1e2da7] mb-3 uppercase tracking-tight">{ticket.title}</h3>
-                  
-                  <div className="grid grid-cols-2 gap-4 text-sm text-gray-500">
-                    <div className="flex items-center gap-2">
-                      <Calendar size={16} className="text-gray-400" />
-                      <span>{ticket.date}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <MapPin size={16} className="text-gray-400" />
-                      <span>{ticket.city}</span>
-                    </div>
-                  </div>
+            <Link key={ticket.id} to={`/ticket-detail/${ticket.id}`} className="block">
+              <div className="bg-white rounded-[20px] p-2 pr-4 flex items-center gap-4 shadow-sm active:scale-[0.98] transition-transform">
+                
+                {/* Miniature de l'événement */}
+                <img 
+                  src={ticket.image} 
+                  alt={ticket.title} 
+                  className="w-[88px] h-[88px] rounded-2xl object-cover shrink-0" 
+                />
+                
+                {/* Informations du billet */}
+                <div className="flex flex-col justify-center">
+                  <h3 className="text-[15px] font-black uppercase tracking-tight text-gray-900 leading-[1.1] mb-1.5 line-clamp-2">
+                    {ticket.title}
+                  </h3>
+                  <span className="text-xs font-bold text-[#8b44f7]">
+                    {ticket.date}
+                  </span>
                 </div>
 
-                <div className="mt-6 flex items-center justify-between border-t border-dashed border-gray-100 pt-4">
-                  <div className="flex items-center gap-2 text-[#1e2da7] font-bold">
-                    <QrCode size={20} />
-                    <span className="text-xs uppercase">Billet prêt</span>
-                  </div>
-                  <Link to={`/ticket-detail/${ticket.id}`}>
-                    <button className="flex items-center gap-2 bg-gray-50 hover:bg-[#1e2da7] hover:text-white px-4 py-2 rounded-xl text-sm font-bold transition-all">
-                      Voir le billet <ArrowRight size={16} />
-                    </button>
-                  </Link>
-                </div>
               </div>
-            </div>
+            </Link>
           ))
         ) : (
-          <div className="text-center py-20 bg-white rounded-[2rem] border-2 border-dashed border-gray-200">
-            <p className="text-gray-400 font-bold uppercase">Aucun billet pour le moment</p>
-            <Link to="/search">
-              <button className="mt-4 text-[#1e2da7] font-black underline">Explorer les évènements</button>
-            </Link>
+          <div className="text-center py-20">
+            <p className="text-gray-400 font-bold uppercase text-sm">
+              Aucun billet {activeTab.toLowerCase()}
+            </p>
           </div>
         )}
       </div>
+
     </div>
   );
 };

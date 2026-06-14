@@ -1,37 +1,28 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Mail, Lock, User, ArrowRight, Building2 } from 'lucide-react';
-import axios from 'axios';
+import { Mail, Lock, User, ArrowRight, Building2 } from 'lucide-react';
 
-const OrganizerAuth = () => {
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState(null);
-  const navigate = useNavigate();
+const OrganizerAuth = ({ setIsLoggedIn, setIsOrganizer }) => {
+  const navigate = useNavigate(); 
+
+  const [isLogin, setIsLogin] = useState(true); 
+
+  const handleLoginSuccess = () => {
+    setIsLoggedIn(true);
+    setIsOrganizer(true);
+    
+    localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('isOrganizer', 'true');
+    
+    navigate('/organizer/dashboard');
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
-
-    if (isLogin) {
-      try {
-        const response = await axios.post('http://localhost:8000/api/login', {
-          email,
-          password
-        });
-        
-        // Stocker le token
-        localStorage.setItem('auth_token', response.data.access_token);
-        
-        navigate('/organizer/dashboard');
-      } catch (err) {
-        setError("Identifiants incorrects ou erreur serveur.");
-      }
-    } else {
-      // Simulation pour l'inscription pour l'instant
-      navigate('/organizer/dashboard');
-    }
+    
+    // Ici tu mettras ta logique d'appel API plus tard
+    // Pour l'instant, on déclenche directement la simulation de succès
+    handleLoginSuccess();
   };
 
   return (

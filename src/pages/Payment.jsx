@@ -1,35 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { CreditCard, Lock, ShieldCheck, ArrowLeft, ChevronDown, ChevronUp, Check } from 'lucide-react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { CreditCard, ChevronDown, Loader2, Check } from 'lucide-react';
 import { allEvents } from '../data/events';
+import boutonRetourSvg from '../assets/bouton-retour.svg';
+// Tes icônes personnalisées
+import appleIcone from '../assets/apple-icone.svg'; 
+import iconeAppleCarte from '../assets/icone-apple-carte.svg';
 
 const Payment = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState(false);
-  const [searchParams] = useSearchParams();
+
+  // État pour gérer la méthode de paiement sélectionnée
+  const [paymentMethod, setPaymentMethod] = useState('apple'); // Par défaut 'apple'
   
-  // Détails de l'événement
-  const event = allEvents.find(e => e.id === parseInt(id)) || {
-    id: parseInt(id),
-    title: "Soirée After School",
-    city: "Lyon",
-    theme: "Loisirs",
-    date: "11 Juin 2026",
-    time: "20:00",
-    price: "25€",
-    image: "https://images.unsplash.com/photo-1514525253361-bee8718a7439?q=80&w=500"
-  };
+  // État pour afficher/masquer la modale de choix de paiement
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
-  const parsedPrice = parseInt(event.price.replace('€', '')) || 25;
-
-  // États pour le choix des tickets et groupes
-  const [count, setCount] = useState(1);
-  const [groups, setGroups] = useState([]);
-  const [selectedGroup, setSelectedGroup] = useState(null);
-  const [isAccordionOpen, setIsAccordionOpen] = useState(true);
-  const [selectedMembers, setSelectedMembers] = useState([]); // Array of member IDs
-  const [choiceValidated, setChoiceValidated] = useState(false);
+  const event = allEvents.find(e => e.id === parseInt(id || ''));
+  const count = location.state?.members?.length || location.state?.count || 1;
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -45,43 +36,8 @@ const Payment = () => {
     }
   }, []);
 
-  // Synchroniser le compteur de tickets avec le nombre de membres sélectionnés
-  useEffect(() => {
-    if (selectedMembers.length > 0) {
-      setCount(selectedMembers.length);
-    }
-  }, [selectedMembers]);
-
-  const handleIncrement = () => {
-    // Si aucun membre n'est sélectionné, on incrémente manuellement
-    if (selectedMembers.length === 0) {
-      setCount(prev => prev + 1);
-    }
-  };
-
-  const handleDecrement = () => {
-    if (selectedMembers.length === 0 && count > 1) {
-      setCount(prev => prev - 1);
-    }
-  };
-
-  const toggleMemberSelection = (memberId) => {
-    if (selectedMembers.includes(memberId)) {
-      setSelectedMembers(selectedMembers.filter(id => id !== memberId));
-    } else {
-      setSelectedMembers([...selectedMembers, memberId]);
-    }
-  };
-
-  const handleValidateChoice = () => {
-    setChoiceValidated(true);
-  };
-
-  const handlePaymentSubmit = (e) => {
-    e.preventDefault();
+  const handlePayment = () => {
     setLoading(true);
-
-    // Simulation de transaction
     setTimeout(() => {
       // Si paiement par groupe, poster un message système dans le chat du groupe
       if (selectedGroup && selectedMembers.length > 0) {
@@ -129,205 +85,248 @@ const Payment = () => {
     }, 2000);
   };
 
-  const totalPrice = parsedPrice * count;
+  if (!event) return null;
+
+  const priceValue = parseFloat(event.price.replace(',', '.').replace(' €', ''));
+  const totalValue = priceValue * count;
+  const formattedTotal = totalValue.toFixed(2).replace('.', ',') + ' €';
+
+  // Helper pour obtenir les infos de la méthode sélectionnée
+  const getPaymentDetails = (method) => {
+    switch(method) {
+      case 'apple':
+        return { 
+          name: 'Apple Pay', 
+          icon: <img src={iconeAppleCarte} alt="Apple Pay" className="h-7 w-auto object-contain" /> 
+        };
+      case 'cb':
+        return { 
+          name: 'Carte Bancaire', 
+          icon: <div className="border border-gray-800 rounded flex items-center justify-center p-1 px-1.5"><CreditCard size={18} className="text-gray-900" strokeWidth={2.5} /></div> 
+        };
+      case 'paypal':
+        return { 
+          name: 'PayPal', 
+          icon: <span className="text-[#0079C1] font-black italic text-xl px-2">P</span> 
+        };
+      default:
+        return { name: '', icon: null };
+    }
+  };
+
+  const currentPayment = getPaymentDetails(paymentMethod);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-6 font-sans">
-      <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
-        
-        {/* --- Colonne Gauche : Récapitulatif de l'événement --- */}
-        <div className="space-y-8">
-          <button 
-            onClick={() => choiceValidated ? setChoiceValidated(false) : navigate(-1)} 
-            className="flex items-center gap-2 text-gray-500 hover:text-[#9146ff] transition-colors font-bold"
-          >
-            <ArrowLeft size={20} /> {choiceValidated ? "Modifier la sélection" : "Retour"}
-          </button>
-          
-          <div>
-            <p className="text-[#9146ff] font-extrabold uppercase tracking-widest text-sm mb-2">Votre commande</p>
-            <h1 className="text-4xl font-black text-gray-900 leading-tight uppercase tracking-tighter">{event.title}</h1>
-            <p className="text-5xl font-black text-[#9146ff] mt-4">{totalPrice},00 €</p>
-          </div>
+    <div className="min-h-screen bg-[#FDFBF7] font-sans antialiased relative overflow-hidden pb-48">
 
-          <div className="flex items-center gap-4 p-4 bg-white rounded-3xl border border-gray-100 shadow-sm">
-            <img src={event.image} alt="" className="w-20 h-20 object-cover rounded-2xl shadow-sm" />
+      {/* ─── HALOS ─── */}
+      <div className="absolute top-0 left-0 right-0 h-96 pointer-events-none z-0">
+        <div className="absolute -top-10 -left-20 w-64 h-64 bg-[#FFF9C4]/60 rounded-full blur-3xl" />
+        <div className="absolute -top-14 -right-10 w-72 h-72 bg-purple-200/40 rounded-full blur-3xl" />
+      </div>
+
+      {/* ─── HEADER ─── */}
+      <div className="relative z-10 px-5 pt-5 pb-2 flex flex-col gap-6">
+        <button
+          onClick={() => navigate(-1)}
+          className="active:scale-95 transition-transform w-fit bg-white rounded-full p-1"
+        >
+          <img
+            src={boutonRetourSvg}
+            alt="Retour"
+            className="w-10 h-10 object-contain"
+          />
+        </button>
+
+        <h1 className="text-[40px] leading-none font-black uppercase tracking-tight text-gray-900">
+          Paiement
+        </h1>
+      </div>
+
+      {/* ─── CARTE RÉSUMÉ ÉVÉNEMENT ─── */}
+      <div className="relative z-10 px-5 mt-2">
+        <div className="bg-white rounded-[20px] p-2 pr-5 flex items-center justify-between shadow-sm">
+          <div className="flex items-center gap-4">
+            <img 
+              src={event.image} 
+              alt={event.title} 
+              className="w-14 h-14 rounded-2xl object-cover"
+            />
             <div>
-              <p className="font-extrabold text-gray-800 text-lg">{event.city}</p>
-              <p className="text-sm text-gray-500 font-semibold">{event.date} • {event.time}</p>
+              <h2 className="text-sm font-black uppercase tracking-tight text-gray-900 line-clamp-1">
+                {event.title}
+              </h2>
+              <p className="text-sm font-medium text-gray-400 mt-0.5">
+                {count} article{count > 1 ? 's' : ''}
+              </p>
             </div>
           </div>
+          <ChevronDown size={20} className="text-gray-900" />
         </div>
+      </div>
 
-        {/* --- Colonne Droite : Panel Interactif (Mockup Tickets / Stripe) --- */}
-        <div className="w-full">
-          {!choiceValidated ? (
-            /* ========================================================= */
-            /* MOCKUP ÉCRAN "TICKETS" (CONFORME À L'IMAGE DE L'UTILISATEUR) */
-            /* ========================================================= */
-            <div className="bg-white rounded-[2rem] shadow-xl border border-gray-50 overflow-hidden flex flex-col p-6 animate-in fade-in duration-200">
-              <h2 className="text-3xl font-black text-gray-900 tracking-tighter uppercase mb-6">TICKETS</h2>
-              
-              {/* Box Ticket Type */}
-              <div className="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm flex items-center justify-between mb-8">
-                <div>
-                  <h3 className="font-extrabold text-gray-800 text-lg uppercase tracking-tight">PRÉVENTE</h3>
-                  <p className="text-[#9146ff] font-black text-lg mt-1">{parsedPrice},00 €</p>
+      {/* ─── LIGNE MÉTHODE DE PAIEMENT ACTUELLE ─── */}
+      <div className="relative z-10 px-5 mt-10">
+        <h3 className="text-lg font-black uppercase tracking-wide text-gray-900 mb-4">
+          Pay with
+        </h3>
+        
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            {currentPayment.icon}
+            <span className="font-bold text-sm text-gray-900">
+              {currentPayment.name}
+            </span>
+          </div>
+
+          <button 
+            onClick={() => setShowPaymentModal(true)}
+            className="bg-[#E8DBFA] text-[#8b44f7] text-xs font-bold px-5 py-3 rounded-xl uppercase tracking-wider active:scale-95 transition-transform"
+          >
+            Changer
+          </button>
+        </div>
+      </div>
+
+      {/* ─── BARRE FIXE EN BAS (TOTAL + BOUTON) ─── */}
+      <div className="fixed bottom-0 left-0 right-0 w-full bg-[#FDFBF7] px-5 pb-8 pt-4 z-20">
+        <div className="max-w-md mx-auto">
+          
+          <div className="flex justify-between items-end mb-4">
+            <span className="text-[22px] font-black uppercase text-gray-900">Total</span>
+            <span className="text-[22px] font-black text-[#8b44f7]">{formattedTotal}</span>
+          </div>
+
+          <button 
+            onClick={handlePayment}
+            disabled={loading}
+            // Le fond est maintenant uniformément violet pour tous les modes de paiement
+            className="w-full h-14 bg-[#8b44f7] text-white font-bold text-xl rounded-2xl active:scale-[0.98] transition-transform flex items-center justify-center gap-2 disabled:opacity-70 shadow-lg shadow-purple-200/50 tracking-tight"
+          >
+            {loading ? (
+              <Loader2 className="animate-spin" size={24} />
+            ) : (
+              <>
+                {paymentMethod === 'apple' && (
+                  <img 
+                    src={appleIcone} 
+                    alt="Apple Pay" 
+                    className="h-8 w-auto object-contain brightness-0 invert" 
+                  />
+                )}
+                {paymentMethod === 'cb' && (
+                  <CreditCard size={32} strokeWidth={2} />
+                )}
+                {paymentMethod === 'paypal' && (
+                  <span className="font-black italic text-[24px]">PayPal</span>
+                )}
+              </>
+            )}
+          </button>
+
+          <p className="text-[10px] text-gray-500 text-center leading-tight mt-4 px-2">
+            En confirmant votre commande, vous acceptez les <span className="font-bold text-gray-900">Conditions Générales d'Utilisation</span> ainsi que la <span className="font-bold text-gray-900">Politique de Confidentialité</span> de SparkUp.
+          </p>
+        </div>
+      </div>
+
+      {/* ─── MODALE BOTTOM SHEET (CHOIX PAIEMENT) ─── */}
+      {showPaymentModal && (
+        <div className="fixed inset-0 z-50 flex flex-col justify-end">
+          <div 
+            className="absolute inset-0 bg-black/30 backdrop-blur-sm transition-opacity"
+            onClick={() => setShowPaymentModal(false)}
+          />
+          
+          <div className="relative bg-[#FDFBF7] w-full max-w-md mx-auto rounded-t-3xl px-5 pt-4 pb-8 shadow-2xl animate-in slide-in-from-bottom-full duration-300">
+            <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-6" />
+
+            <h2 className="text-center text-lg font-black uppercase tracking-tight text-gray-900 mb-6">
+              Méthode de paiement
+            </h2>
+
+            <div className="flex flex-col gap-3">
+              {/* Option Apple Pay */}
+              <button 
+                onClick={() => {
+                  setPaymentMethod('apple');
+                  setShowPaymentModal(false);
+                }}
+                className={`flex items-center justify-between p-4 rounded-2xl border transition-all active:scale-[0.99] ${
+                  paymentMethod === 'apple' 
+                    ? 'border-[#8b44f7] bg-[#E8DBFA]' 
+                    : 'border-transparent bg-white shadow-sm'
+                }`}
+              >
+                <div className="flex items-center gap-4">
+                  <img src={iconeAppleCarte} alt="Apple Pay" className="h-7 w-auto object-contain" />
+                  <span className={`font-bold text-sm ${paymentMethod === 'apple' ? 'text-[#8b44f7]' : 'text-gray-900'}`}>
+                    Apple Pay
+                  </span>
                 </div>
-                
-                {/* Stepper Count */}
-                <div className="flex items-center bg-gray-50 border border-gray-100 rounded-full px-3 py-1.5 shadow-sm">
-                  <button 
-                    onClick={handleDecrement}
-                    className="w-8 h-8 rounded-full bg-white flex items-center justify-center font-bold text-gray-500 hover:text-black border border-gray-100 shadow-sm"
-                  >
-                    —
-                  </button>
-                  <span className="w-10 text-center font-black text-lg text-purple-750">{count}</span>
-                  <button 
-                    onClick={handleIncrement}
-                    className="w-8 h-8 rounded-full bg-white flex items-center justify-center font-bold text-gray-500 hover:text-black border border-gray-100 shadow-sm"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-
-              {/* Accordion Group Selection */}
-              <div className="border-t border-gray-100 pt-6 space-y-4">
-                <div className="text-center font-black text-gray-800 text-lg mb-4 flex items-center justify-center gap-1.5">
-                  Quelle groupe ? 👀
-                </div>
-
-                {selectedGroup ? (
-                  <div className="border border-gray-100 rounded-3xl overflow-hidden shadow-sm">
-                    {/* Header Accordion */}
-                    <button 
-                      onClick={() => setIsAccordionOpen(!isAccordionOpen)}
-                      className="w-full bg-white px-5 py-4 flex items-center justify-between border-b border-gray-50 hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <img src={selectedGroup.image} alt="" className="w-10 h-10 rounded-full object-cover shadow-sm bg-purple-100" />
-                        <span className="font-extrabold text-gray-800 text-sm text-left">{selectedGroup.name}</span>
-                      </div>
-                      {isAccordionOpen ? <ChevronUp className="text-gray-400" /> : <ChevronDown className="text-gray-400" />}
-                    </button>
-
-                    {/* Content Accordion (Grid of Members) */}
-                    {isAccordionOpen && (
-                      <div className="p-6 bg-white">
-                        <div className="grid grid-cols-3 gap-6 justify-items-center">
-                          {selectedGroup.members.map((member) => {
-                            const isSelected = selectedMembers.includes(member.id);
-                            return (
-                              <button
-                                key={member.id}
-                                onClick={() => toggleMemberSelection(member.id)}
-                                className="flex flex-col items-center gap-2 group outline-none"
-                              >
-                                <div className="relative">
-                                  <img 
-                                    src={member.image} 
-                                    alt={member.name} 
-                                    className={`w-16 h-16 rounded-full object-cover shadow-md transition-all duration-200 border-2 ${
-                                      isSelected ? 'border-[#9146ff] scale-105' : 'border-transparent group-hover:scale-102'
-                                    }`}
-                                  />
-                                  {/* Purple Check badge */}
-                                  {isSelected && (
-                                    <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-[#9146ff] border-2 border-white rounded-full flex items-center justify-center text-white shadow-sm">
-                                      <Check size={12} strokeWidth={3} />
-                                    </div>
-                                  )}
-                                </div>
-                                <span className="font-extrabold text-xs text-gray-800 tracking-tight group-hover:text-black">
-                                  {member.name}
-                                </span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="text-center py-6 border border-dashed border-gray-200 rounded-3xl">
-                    <p className="text-gray-400 text-sm font-semibold mb-2">Vous n'avez pas encore de groupe</p>
-                    <button 
-                      onClick={() => navigate('/messages')}
-                      className="text-[#9146ff] font-bold text-xs underline"
-                    >
-                      Créer un groupe
-                    </button>
+                {paymentMethod === 'apple' && (
+                  <div className="w-6 h-6 rounded-full bg-[#8b44f7] flex items-center justify-center">
+                    <Check size={14} color="white" strokeWidth={3} />
                   </div>
                 )}
-              </div>
+              </button>
 
-              {/* Validate Choice Button */}
+              {/* Option CB */}
               <button 
-                onClick={handleValidateChoice}
-                className="w-full py-4 mt-8 bg-[#9146ff] hover:bg-[#7c3aed] text-white font-black text-base rounded-3xl shadow-lg transition-all"
+                onClick={() => {
+                  setPaymentMethod('cb');
+                  setShowPaymentModal(false);
+                }}
+                className={`flex items-center justify-between p-4 rounded-2xl border transition-all active:scale-[0.99] ${
+                  paymentMethod === 'cb' 
+                    ? 'border-[#8b44f7] bg-[#E8DBFA]' 
+                    : 'border-transparent bg-white shadow-sm'
+                }`}
               >
-                VALIDER LE CHOIX
+                <div className="flex items-center gap-4">
+                  <div className="border border-gray-800 rounded flex items-center justify-center p-1 px-1.5">
+                    <CreditCard size={18} className="text-gray-900" strokeWidth={2.5} />
+                  </div>
+                  <span className={`font-bold text-sm ${paymentMethod === 'cb' ? 'text-[#8b44f7]' : 'text-gray-900'}`}>
+                    Carte Bancaire
+                  </span>
+                </div>
+                {paymentMethod === 'cb' && (
+                  <div className="w-6 h-6 rounded-full bg-[#8b44f7] flex items-center justify-center">
+                    <Check size={14} color="white" strokeWidth={3} />
+                  </div>
+                )}
+              </button>
+
+              {/* Option PayPal */}
+              <button 
+                onClick={() => {
+                  setPaymentMethod('paypal');
+                  setShowPaymentModal(false);
+                }}
+                className={`flex items-center justify-between p-4 rounded-2xl border transition-all active:scale-[0.99] ${
+                  paymentMethod === 'paypal' 
+                    ? 'border-[#8b44f7] bg-[#E8DBFA]' 
+                    : 'border-transparent bg-white shadow-sm'
+                }`}
+              >
+                <div className="flex items-center gap-4">
+                  <span className="text-[#0079C1] font-black italic text-xl px-2">P</span>
+                  <span className={`font-bold text-sm ${paymentMethod === 'paypal' ? 'text-[#8b44f7]' : 'text-gray-900'}`}>
+                    PayPal
+                  </span>
+                </div>
+                {paymentMethod === 'paypal' && (
+                  <div className="w-6 h-6 rounded-full bg-[#8b44f7] flex items-center justify-center">
+                    <Check size={14} color="white" strokeWidth={3} />
+                  </div>
+                )}
               </button>
             </div>
-          ) : (
-            /* ========================================================= */
-            /* ÉCRAN FORMULAIRE STRIPE DE PAIEMENT                       */
-            /* ========================================================= */
-            <div className="bg-white p-8 rounded-[2rem] shadow-xl border border-gray-100 animate-in fade-in duration-200">
-              <h2 className="text-2xl font-black text-gray-950 mb-6 tracking-tight flex items-center gap-2 uppercase">
-                Paiement Sécurisé
-              </h2>
-              
-              <form onSubmit={handlePaymentSubmit} className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-700">Informations de carte</label>
-                  <div className="relative">
-                    <CreditCard className="absolute left-4 top-3.5 text-gray-400" size={20} />
-                    <input 
-                      type="text" 
-                      placeholder="1234 5678 1234 5678" 
-                      className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#9146ff]"
-                      required 
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <input type="text" placeholder="MM / YY" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#9146ff]" required />
-                    <input type="text" placeholder="CVC" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#9146ff]" required />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-700">Nom sur la carte</label>
-                  <input type="text" placeholder="Adrien Macaire" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#9146ff]" required />
-                </div>
-
-                {selectedGroup && selectedMembers.length > 0 && (
-                  <div className="p-4 bg-purple-50/50 rounded-2xl border border-purple-100/50 text-xs text-purple-750 font-semibold leading-relaxed">
-                    🎫 Achat groupé : vous allez payer pour {selectedMembers.length} membres de votre groupe <strong>"{selectedGroup.name}"</strong>. Les billets leur seront directement envoyés dans leur espace.
-                  </div>
-                )}
-
-                <button 
-                  disabled={loading}
-                  className={`w-full py-4 rounded-xl text-white font-black text-lg shadow-lg transition-all flex items-center justify-center gap-3 ${loading ? 'bg-gray-400' : 'bg-[#9146ff] hover:bg-[#7c3aed]'}`}
-                >
-                  {loading ? "Traitement..." : `Payer ${totalPrice},00 €`}
-                  {!loading && <Lock size={18} />}
-                </button>
-
-                <div className="flex items-center justify-center gap-6 text-gray-400 pt-4 border-t border-gray-100">
-                  <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest">
-                    <ShieldCheck size={14} className="text-green-500" /> Sécurisé par Stripe
-                  </div>
-                </div>
-              </form>
-            </div>
-          )}
+          </div>
         </div>
+      )}
 
-      </div>
     </div>
   );
 };

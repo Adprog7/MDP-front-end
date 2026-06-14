@@ -1,11 +1,15 @@
 import React, { useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { QrCode, MapPin, Calendar, Clock, ArrowLeft, Download } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { QrCode, Share, RefreshCcw, MoreHorizontal } from 'lucide-react';
 import { allEvents } from '../data/events';
+import boutonRetourSvg from '../assets/bouton-retour.svg';
+// Je suppose que tu as un icône Apple Wallet dans tes assets, sinon je mets un SVG inline
+// import appleWalletIcon from '../assets/apple-wallet.svg';
 
 const TicketDetail = () => {
   const { id } = useParams();
-  const event = allEvents.find(e => e.id === parseInt(id));
+  const navigate = useNavigate();
+  const event = allEvents.find(e => e.id === parseInt(id || ''));
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -14,70 +18,121 @@ const TicketDetail = () => {
   if (!event) return <div className="p-20 text-center font-bold">Billet introuvable</div>;
 
   return (
-    <div className="max-w-md mx-auto p-6 mb-20">
-      {/* Retour arrière */}
-      <Link to="/my-tickets" className="flex items-center gap-2 text-gray-500 hover:text-[#1e2da7] mb-6 font-semibold transition-colors">
-        <ArrowLeft size={20} /> Mes billets
-      </Link>
+    <div className="min-h-screen bg-[#FDFBF7] font-sans antialiased relative overflow-hidden pb-32">
 
-      {/* --- DESIGN DU TICKET --- */}
-      <div className="bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-gray-100 flex flex-col">
-        
-        {/* Partie Haute : Image & Titre */}
-        <div className="relative h-40">
-          <img src={event.image} alt="" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-6">
-            <h1 className="text-white text-2xl font-black uppercase tracking-tighter">{event.title}</h1>
-          </div>
-        </div>
+      {/* ─── HALOS FLOUES DE DÉGRADÉ ─── */}
+      <div className="absolute top-0 left-0 right-0 h-96 pointer-events-none z-0">
+        <div className="absolute -top-10 -left-20 w-64 h-64 bg-[#FFF9C4]/60 rounded-full blur-3xl" />
+        <div className="absolute -top-14 -right-10 w-72 h-72 bg-purple-200/40 rounded-full blur-3xl" />
+      </div>
 
-        {/* Partie Milieu : Infos */}
-        <div className="p-8 space-y-6 bg-white relative">
-          <div className="grid grid-cols-2 gap-6">
+      {/* ─── HEADER ─── */}
+      <div className="relative z-10 px-5 pt-5 pb-6 flex items-center justify-between">
+        <button
+          onClick={() => navigate(-1)}
+          className="active:scale-95 transition-transform w-fit bg-white rounded-full p-1"
+        >
+          <img
+            src={boutonRetourSvg}
+            alt="Retour"
+            className="w-10 h-10 object-contain"
+          />
+        </button>
+
+        <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center font-bold text-gray-900 shadow-sm active:scale-95 transition-transform">
+          ?
+        </button>
+      </div>
+
+      {/* ─── TICKET PRINCIPAL ─── */}
+      <div className="relative z-10 px-5">
+        <div className="bg-white rounded-[20px] shadow-sm relative pt-10 pb-8 px-6 overflow-hidden">
+          
+          {/* Encoche style ticket en haut */}
+          <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 bg-[#FDFBF7] rounded-full"></div>
+
+          {/* En-tête du ticket (Noms des artistes / Line up) */}
+          <div className="grid grid-cols-3 text-center mb-10 text-[9px] font-bold text-gray-900 leading-tight uppercase">
             <div>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Date</p>
-              <div className="flex items-center gap-2 text-[#1e2da7] font-bold">
-                <Calendar size={16} /> <span>{event.date}</span>
-              </div>
+              <p>DAVID GUETTA</p>
+              <p>(LE TRANSBORDEUR)</p>
+              <p>24/05/26</p>
             </div>
             <div>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Heure</p>
-              <div className="flex items-center gap-2 text-[#1e2da7] font-bold">
-                <Clock size={16} /> <span>{event.time}</span>
-              </div>
+              <p>AFTER SCHOOL</p>
+              <p>(LE SUCRE)</p>
+              <p>24/05/26</p>
+              <p>23:00 - 5:00</p>
+            </div>
+            <div>
+              <p>GUEST</p>
+              <p>(LE TRANSBORDEUR)</p>
+              <p>25/05/26</p>
             </div>
           </div>
 
-          <div>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Lieu</p>
-            <div className="flex items-center gap-2 text-gray-800 font-bold">
-              <MapPin size={16} className="text-[#f06292]" /> <span>{event.city}, France</span>
+          {/* Informations événement */}
+          <div className="text-center mb-8">
+            <h2 className="text-sm font-black text-gray-900 uppercase tracking-tight">
+              {event.title} - {event.city}
+            </h2>
+          </div>
+
+          {/* Zone QR Code */}
+          <div className="flex flex-col items-center justify-center mb-8">
+            <div className="mb-2">
+              {/* Remplacement du vrai QR code par une icône ou une image générée. Ici j'utilise lucide-react, mais en prod ce serait l'image du QR */}
+              <QrCode size={200} strokeWidth={1} className="text-black" />
             </div>
+            <p className="text-xs font-bold text-gray-400 font-mono tracking-wider">
+              42389014713514 - {event.price}
+            </p>
           </div>
 
-          {/* Séparateur Pointillé (Effet Ticket) */}
-          <div className="relative h-px border-t-2 border-dashed border-gray-100 my-8">
-            <div className="absolute -left-12 -top-3 w-8 h-8 bg-gray-50 rounded-full border border-gray-100 shadow-inner"></div>
-            <div className="absolute -right-12 -top-3 w-8 h-8 bg-gray-50 rounded-full border border-gray-100 shadow-inner"></div>
+          {/* Footer du ticket (Date & Heure) */}
+          <div className="flex justify-between items-center text-xs font-black text-gray-900">
+            <span>sam 24 Mai.</span>
+            <span>20:00 - 22:30</span>
           </div>
 
-          {/* --- ZONE QR CODE --- */}
-          <div className="flex flex-col items-center justify-center py-4">
-            <div className="bg-gray-50 p-6 rounded-3xl border-2 border-gray-100 mb-4 group hover:bg-white transition-all duration-500 hover:shadow-xl">
-              <QrCode size={180} strokeWidth={1.5} className="text-[#1e2da7]" />
-            </div>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em]">Scannez à l'entrée</p>
-            <p className="text-xs font-mono text-gray-300 mt-2">ID-{event.id}99283745</p>
-          </div>
-        </div>
-
-        {/* Bouton Action */}
-        <div className="p-6 bg-gray-50 border-t border-gray-100">
-          <button className="w-full py-4 bg-white border border-gray-200 rounded-2xl text-[#1e2da7] font-bold flex items-center justify-center gap-2 hover:bg-[#1e2da7] hover:text-white transition-all shadow-sm">
-            <Download size={18} /> Télécharger en PDF
-          </button>
         </div>
       </div>
+
+      {/* ─── BOUTONS D'ACTION (Revendre, Transférer, Plus) ─── */}
+      <div className="relative z-10 px-6 mt-8 flex justify-between gap-4 max-w-sm mx-auto">
+        <button className="flex flex-col items-center gap-2 flex-1 bg-white py-4 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] active:scale-95 transition-transform">
+          <RefreshCcw size={22} className="text-gray-900" />
+          <span className="text-[10px] font-bold text-gray-900">Revendre</span>
+        </button>
+
+        <button className="flex flex-col items-center gap-2 flex-1 bg-white py-4 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] active:scale-95 transition-transform">
+          <Share size={22} className="text-gray-900" />
+          <span className="text-[10px] font-bold text-gray-900">Transférer</span>
+        </button>
+
+        <button className="flex flex-col items-center gap-2 flex-1 bg-white py-4 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] active:scale-95 transition-transform">
+          <MoreHorizontal size={22} className="text-gray-900" />
+          <span className="text-[10px] font-bold text-gray-900">Plus</span>
+        </button>
+      </div>
+
+      {/* ─── BOUTON APPLE WALLET ─── */}
+      <div className="relative z-10 px-5 mt-6 flex justify-center">
+        <button className="bg-black text-white px-5 py-2.5 rounded-[14px] flex items-center gap-3 active:scale-95 transition-transform">
+          {/* Faux logo wallet stylisé en CSS */}
+          <div className="w-8 h-5 bg-white rounded flex items-center justify-center relative overflow-hidden">
+            <div className="w-full h-1/3 bg-orange-400 absolute top-0"></div>
+            <div className="w-full h-1/3 bg-green-500 absolute top-1/3"></div>
+            <div className="w-full h-1/3 bg-blue-500 absolute bottom-0"></div>
+            <div className="w-4 h-2 bg-white rounded-full absolute -top-1"></div>
+          </div>
+          <div className="text-left">
+            <p className="text-[9px] font-medium text-gray-300 leading-tight">Ajouter à</p>
+            <p className="text-sm font-semibold leading-tight">Apple Cartes</p>
+          </div>
+        </button>
+      </div>
+
     </div>
   );
 };

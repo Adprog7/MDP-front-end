@@ -1,39 +1,36 @@
 import React from 'react';
-import { Search, Compass, ShieldCheck, UserCircle, MessageSquare, LayoutDashboard, Users } from 'lucide-react'; 
-import { Link } from 'react-router-dom';
+import { Search, Home, ShieldCheck, User, MessageSquare, LayoutDashboard, Ticket } from 'lucide-react'; 
+import { Link, useLocation } from 'react-router-dom';
+import logoSvg from '../assets/spark-up-header.svg'; 
 
 const Navbar = ({ isLoggedIn, isOrganizer }) => {
-  // 1. Items de base
+  const location = useLocation();
+
+  // 1. Items de base accessibles à tout le monde
   const navItems = [
-    { label: 'Explorer', icon: <Compass size={24} />, path: '/' },
+    { label: 'Accueil', icon: <Home size={24} />, path: '/' },
     { label: 'Recherche', icon: <Search size={24} />, path: '/search' },
+    { label: 'Mes billets', icon: <Ticket size={24} />, path: '/my-tickets' }, 
   ];
 
-  // 2. Gestion de l'item "Organisateur" ou "Dashboard"
-  // Si connecté en tant que Pro, on remplace "Organisateur" par "Dashboard"
-  if (isOrganizer && isLoggedIn) {
-    navItems.push({ label: 'Dashboard', icon: <LayoutDashboard size={24} />, path: '/organizer/dashboard' });
-  } else {
-    navItems.push({ label: 'Organisateur', icon: <ShieldCheck size={24} />, path: '/organizer/login' });
-  }
 
-  // 3. Items "Messages" et "Amis" (Client ou Pro connecté)
+  // 3. Item "Messages" (Uniquement si connecté)
   if (isLoggedIn) {
-    navItems.push({ label: 'Messages', icon: <MessageSquare size={24} />, path: '/messages' });
-    navItems.push({ label: 'Amis', icon: <Users size={24} />, path: '/friends' });
+    if (isOrganizer) {
+      navItems.push({ label: 'Messages', icon: <MessageSquare size={24} />, path: '/groups' });
+    }
   }
 
-  // 4. Bouton Compte dynamique
-  // Si isOrganizer est vrai, on va vers le profil pro, sinon vers le profil client
+  // 4. Configuration du Bouton Dynamique (Connexion / Compte)
   let authPath = '/login';
   let authLabel = 'Connexion';
 
   if (isLoggedIn) {
     authLabel = 'Compte';
-    authPath = isOrganizer ? '/organizer/profile' : '/account';
+    authPath = isOrganizer ? '/organizer/profile' : '/account'; 
   }
 
-  const authItem = { label: authLabel, icon: <UserCircle size={24} />, path: authPath };
+  const authItem = { label: authLabel, icon: <User size={24} />, path: authPath };
   const allItems = [...navItems, authItem];
 
   return (
@@ -41,8 +38,9 @@ const Navbar = ({ isLoggedIn, isOrganizer }) => {
       {/* --- VERSION BUREAU --- */}
       <nav className="hidden md:flex items-center justify-center px-10 py-4 bg-white border-b border-gray-100 sticky top-0 z-50">
         <div className="flex items-center justify-between w-full max-w-6xl">
-          <Link to="/" className="font-black text-2xl tracking-tighter text-[#1e2da7]">
-            SPARK<span className="text-[#f06292]">UP</span>
+          {/* 🟢 Utilisation du SVG aussi sur la version bureau pour garder la même charte graphique */}
+          <Link to="/" className="flex items-center">
+            <img src={logoSvg} alt="SparkUp" className="h-7 w-auto object-contain" />
           </Link>
           
           <div className="flex justify-center gap-8 flex-1">
@@ -61,20 +59,37 @@ const Navbar = ({ isLoggedIn, isOrganizer }) => {
       </nav>
 
       {/* --- VERSION MOBILE --- */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 h-16">
-        <div className="flex justify-around items-center h-full w-full px-2">
-          {allItems.map((item, index) => (
-            <Link 
-              key={index} 
-              to={item.path} 
-              className="flex flex-col items-center justify-center w-full text-gray-400 hover:text-[#1e2da7] transition-colors"
-            >
-              {React.cloneElement(item.icon, { size: 22 })}
-              <span className="text-[8px] mt-1 font-black uppercase text-center truncate w-full px-1">
-                {item.label === 'Connexion' ? 'Profil' : item.label} 
-              </span>
-            </Link>
-          ))}
+      <nav className="md:hidden fixed bottom-6 left-4 right-4 bg-white shadow-xl border border-gray-100 z-50 h-16 rounded-full px-1 flex items-center">
+        <div className="flex justify-around items-center h-full w-full">
+          {allItems.map((item, index) => {
+            const isAuthButton = item.path === '/login' || item.path === '/account' || item.path === '/organizer/profile';
+            const displayLabel = isAuthButton ? 'Profil' : item.label;
+            
+            const isActive = location.pathname === item.path;
+
+            return (
+              <Link 
+                key={index} 
+                to={item.path} 
+                className={`flex flex-col items-center justify-center py-1.5 transition-all duration-300 ${
+                  isActive 
+                    ? 'bg-[#d7c3fa] text-[#8b44f7] rounded-full px-8 min-w-[100px]' 
+                    : 'text-gray-800 px-2'
+                }`}
+              >
+                {React.cloneElement(item.icon, { 
+                  size: 20, 
+                  className: isActive ? 'text-[#8b44f7]' : 'text-gray-800'
+                })}
+                
+                <span className={`text-[9px] mt-0.5 font-bold text-center truncate tracking-wide ${
+                  isActive ? 'text-[#8b44f7]' : 'text-gray-800'
+                }`}>
+                  {displayLabel}
+                </span>
+              </Link>
+            );
+          })}
         </div>
       </nav>
     </>
