@@ -18,38 +18,17 @@ import starIcon from '../assets/star.svg';
 import organisateursBanniere from '../assets/organisateurs_bannière.svg';
 import encadreDateSvg from '../assets/encadre-evenement-date.svg';
 
-const eventsData = [
-  {
-    id: 1,
-    title: "SUMMER VIBES",
-    city: "Lyon, France",
-    theme: "Sport",
-    date: "24 MAI",
-    price: "25,00 €",
-    tag: "OUTDOOR",
-    image: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=500"
-  },
-  {
-    id: 2,
-    title: "TECHNO ROOM",
-    city: "Marseille, France",
-    theme: "Clubs",
-    date: "24 MAI",
-    price: "18,00 €",
-    tag: "DJ SET",
-    image: "https://images.unsplash.com/photo-1574391884720-bbc3740c59d1?q=80&w=500"
-  },
-  {
-    id: 3,
-    title: "GREEN FESTIVAL",
-    city: "Bordeaux, France",
-    theme: "Festivals",
-    date: "24 MAI",
-    price: "35,00 €",
-    tag: "ECO",
-    image: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?q=80&w=500"
-  }
-];
+// --- TYPES TYPESCRIPT POUR L'API ET LES PROPS ---
+type Event = {
+  id: number;
+  title: string;
+  city: string;
+  theme: string;
+  date: string;
+  price: string;
+  tag: string;
+  image: string;
+};
 
 const categories = [
   { id: "Tout", label: "Tout", iconDefault: toutIcon, iconActif: toutActifIcon },
@@ -73,21 +52,21 @@ const useMediaQuery = (query: string) => {
   return matches;
 };
 
-// --- TYPES TYPESCRIPT POUR LES PROPS ---
 type HomeProps = {
   searchQuery: string;
   setSearchQuery: (val: string) => void;
   selectedCategory: string;
   setSelectedCategory: (val: string) => void;
-  filteredEvents: typeof eventsData;
+  filteredEvents: Event[];
   likedEvents: number[];
   toggleLike: (id: number, e: React.MouseEvent<HTMLButtonElement>) => void;
+  loading: boolean;
 };
 
 // ============================================================================
 // 📱 VUE MOBILE
 // ============================================================================
-const MobileHome = ({ searchQuery, setSearchQuery, selectedCategory, setSelectedCategory, filteredEvents, likedEvents, toggleLike }: HomeProps) => (
+const MobileHome = ({ searchQuery, setSearchQuery, selectedCategory, setSelectedCategory, filteredEvents, likedEvents, toggleLike, loading }: HomeProps) => (
   <div className="min-h-screen bg-[#FDFBF7] pt-4 pb-24 px-5 max-w-md mx-auto font-sans antialiased relative overflow-hidden">
     
     <div className="absolute top-0 left-0 right-0 h-96 pointer-events-none z-0 overflow-hidden">
@@ -134,33 +113,41 @@ const MobileHome = ({ searchQuery, setSearchQuery, selectedCategory, setSelected
             <img src={starIcon} alt="Étoile" className="w-5 h-5 object-contain" />
           </h2>
         </div>
-        <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-none" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-          {filteredEvents.map(event => (
-            <Link to={`/event/${event.id}`} key={event.id} className="min-w-[155px] w-[155px] bg-white rounded-[24px] overflow-hidden shadow-sm border border-gray-100/40 block flex-shrink-0 relative">
-              <div className="relative h-36 w-full">
-                <img src={event.image} alt={event.title} className="w-full h-full object-cover" />
-                <div className="absolute bottom-2 left-2 w-11 h-11 flex items-center justify-center select-none">
-                  <img src={encadreDateSvg} alt="" className="absolute inset-0 w-full h-full object-contain" />
-                  <div className="relative z-10 flex flex-col items-center justify-center leading-none text-gray-950 font-black text-[10px]">
-                    <span>{event.date.split(' ')[0]}</span>
-                    <span className="text-[7px] font-bold mt-0.5 text-gray-700">{event.date.split(' ')[1]}</span>
+        
+        {/* Affichage conditionnel : Loading / Empty / Contenu */}
+        {loading ? (
+          <p className="text-sm text-gray-400 font-medium py-6 text-center w-full">Chargement des évènements...</p>
+        ) : filteredEvents.length === 0 ? (
+          <p className="text-sm text-gray-400 font-medium py-6 text-center w-full">Aucun évènement ne correspond à votre recherche.</p>
+        ) : (
+          <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-none" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            {filteredEvents?.map(event => (
+              <Link to={`/event/${event.id}`} key={event.id} className="min-w-[155px] w-[155px] bg-white rounded-[24px] overflow-hidden shadow-sm border border-gray-100/40 block flex-shrink-0 relative">
+                <div className="relative h-36 w-full">
+                  <img src={event.image} alt={event.title} className="w-full h-full object-cover" />
+                  <div className="absolute bottom-2 left-2 w-11 h-11 flex items-center justify-center select-none">
+                    <img src={encadreDateSvg} alt="" className="absolute inset-0 w-full h-full object-contain" />
+                    <div className="relative z-10 flex flex-col items-center justify-center leading-none text-gray-950 font-black text-[10px]">
+                      <span>{event.date?.split(' ')[0]}</span>
+                      <span className="text-[7px] font-bold mt-0.5 text-gray-700">{event.date?.split(' ')[1]}</span>
+                    </div>
                   </div>
+                  <button onClick={(e) => toggleLike(event.id, e)} className="absolute top-3 right-3 w-7 h-7 bg-black/20 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-transform active:scale-95 z-10">
+                    <Heart size={14} className={likedEvents.includes(event.id) ? "fill-red-500 text-red-500" : "text-white"} />
+                  </button>
                 </div>
-                <button onClick={(e) => toggleLike(event.id, e)} className="absolute top-3 right-3 w-7 h-7 bg-black/20 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-transform active:scale-95 z-10">
-                  <Heart size={14} className={likedEvents.includes(event.id) ? "fill-red-500 text-red-500" : "text-white"} />
-                </button>
-              </div>
-              <div className="p-3">
-                <h3 className="font-black text-xs tracking-tight text-gray-900 truncate">{event.title}</h3>
-                <div className="flex items-center gap-0.5 text-[10px] text-gray-400 font-semibold mt-1">
-                  <MapPin size={10} className="text-gray-400" />
-                  <span className="truncate">{event.city}</span>
+                <div className="p-3">
+                  <h3 className="font-black text-xs tracking-tight text-gray-900 truncate">{event.title}</h3>
+                  <div className="flex items-center gap-0.5 text-[10px] text-gray-400 font-semibold mt-1">
+                    <MapPin size={10} className="text-gray-400" />
+                    <span className="truncate">{event.city}</span>
+                  </div>
+                  <div className="text-xs font-black text-[#7c3aed] mt-2">{event.price}</div>
                 </div>
-                <div className="text-xs font-black text-[#7c3aed] mt-2">{event.price}</div>
-              </div>
-            </Link>
-          ))}
-        </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="mb-8 cursor-pointer hover:opacity-95 transition-opacity">
@@ -171,27 +158,35 @@ const MobileHome = ({ searchQuery, setSearchQuery, selectedCategory, setSelected
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-extrabold tracking-tight text-gray-900">Recommandé pour vous</h2>
         </div>
-        <div className="space-y-3">
-          {filteredEvents.map(event => (
-            <Link to={`/event/${event.id}`} key={event.id} className="bg-white rounded-2xl p-2 flex gap-3 items-center shadow-sm border border-gray-50/50 hover:border-gray-100 transition-all">
-              <img src={event.image} alt={event.title} className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <h3 className="font-black text-xs tracking-tight text-gray-900 truncate">{event.title}</h3>
-                <div className="flex items-center gap-0.5 text-[10px] text-gray-400 font-semibold mt-0.5">
-                  <MapPin size={10} />
-                  <span className="truncate">{event.city}</span>
+        
+        {/* Affichage conditionnel (Recommandé) */}
+        {loading ? (
+          <p className="text-sm text-gray-400 font-medium py-6 text-center w-full">Recherche de recommandations...</p>
+        ) : filteredEvents.length === 0 ? (
+          <p className="text-sm text-gray-400 font-medium py-6 text-center w-full">Rien à vous recommander pour le moment.</p>
+        ) : (
+          <div className="space-y-3">
+            {filteredEvents?.map(event => (
+              <Link to={`/event/${event.id}`} key={event.id} className="bg-white rounded-2xl p-2 flex gap-3 items-center shadow-sm border border-gray-50/50 hover:border-gray-100 transition-all">
+                <img src={event.image} alt={event.title} className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-black text-xs tracking-tight text-gray-900 truncate">{event.title}</h3>
+                  <div className="flex items-center gap-0.5 text-[10px] text-gray-400 font-semibold mt-0.5">
+                    <MapPin size={10} />
+                    <span className="truncate">{event.city}</span>
+                  </div>
+                  <span className="inline-block bg-[#F5EFFF] text-[#7c3aed] font-bold text-[9px] px-1.5 py-0.5 rounded-md mt-1.5 tracking-wide">{event.tag || "DJ SET"}</span>
                 </div>
-                <span className="inline-block bg-[#F5EFFF] text-[#7c3aed] font-bold text-[9px] px-1.5 py-0.5 rounded-md mt-1.5 tracking-wide">{event.tag || "DJ SET"}</span>
-              </div>
-              <div className="text-right pr-2 flex flex-col items-end justify-between h-14 py-1 flex-shrink-0">
-                <span className="text-xs font-black text-[#7c3aed]">{event.price}</span>
-                <button onClick={(e) => toggleLike(event.id, e)} className="text-gray-300 hover:text-red-500 transition-colors">
-                  <Heart size={14} className={likedEvents.includes(event.id) ? "fill-red-500 text-red-500" : ""} />
-                </button>
-              </div>
-            </Link>
-          ))}
-        </div>
+                <div className="text-right pr-2 flex flex-col items-end justify-between h-14 py-1 flex-shrink-0">
+                  <span className="text-xs font-black text-[#7c3aed]">{event.price}</span>
+                  <button onClick={(e) => toggleLike(event.id, e)} className="text-gray-300 hover:text-red-500 transition-colors">
+                    <Heart size={14} className={likedEvents.includes(event.id) ? "fill-red-500 text-red-500" : ""} />
+                  </button>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   </div>
@@ -200,7 +195,7 @@ const MobileHome = ({ searchQuery, setSearchQuery, selectedCategory, setSelected
 // ============================================================================
 // 💻 VUE DESKTOP (Large, aérée et centrée)
 // ============================================================================
-const DesktopHome = ({ searchQuery, setSearchQuery, selectedCategory, setSelectedCategory, filteredEvents, likedEvents, toggleLike }: HomeProps) => (
+const DesktopHome = ({ searchQuery, setSearchQuery, selectedCategory, setSelectedCategory, filteredEvents, likedEvents, toggleLike, loading }: HomeProps) => (
   <div className="min-h-screen bg-[#FDFBF7] pt-12 pb-24 px-10 w-full font-sans antialiased relative overflow-hidden">
     
     <div className="absolute top-0 left-0 right-0 h-96 pointer-events-none z-0 overflow-hidden">
@@ -246,59 +241,73 @@ const DesktopHome = ({ searchQuery, setSearchQuery, selectedCategory, setSelecte
         <h2 className="text-3xl font-black tracking-tight text-gray-900 flex items-center gap-3 mb-8">
           À la une <img src={starIcon} alt="Étoile" className="w-8 h-8 object-contain" />
         </h2>
-        <div className="grid grid-cols-4 gap-6">
-          {filteredEvents.map(event => (
-            <Link to={`/event/${event.id}`} key={event.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100/40 group hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-              <div className="relative h-48 w-full overflow-hidden">
-                <img src={event.image} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                <div className="absolute bottom-3 left-3 w-14 h-14 flex items-center justify-center select-none">
-                  <img src={encadreDateSvg} alt="" className="absolute inset-0 w-full h-full object-contain" />
-                  <div className="relative z-10 flex flex-col items-center justify-center leading-none text-gray-950 font-black text-xs">
-                    <span>{event.date.split(' ')[0]}</span>
-                    <span className="text-[9px] font-bold mt-0.5 text-gray-700">{event.date.split(' ')[1]}</span>
+        
+        {loading ? (
+          <div className="text-center py-10 w-full"><p className="text-gray-400 font-bold">Chargement des évènements...</p></div>
+        ) : filteredEvents.length === 0 ? (
+          <div className="text-center py-10 w-full"><p className="text-gray-400 font-bold">Aucun évènement ne correspond à votre recherche.</p></div>
+        ) : (
+          <div className="grid grid-cols-4 gap-6">
+            {filteredEvents?.map(event => (
+              <Link to={`/event/${event.id}`} key={event.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100/40 group hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                <div className="relative h-48 w-full overflow-hidden">
+                  <img src={event.image} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <div className="absolute bottom-3 left-3 w-14 h-14 flex items-center justify-center select-none">
+                    <img src={encadreDateSvg} alt="" className="absolute inset-0 w-full h-full object-contain" />
+                    <div className="relative z-10 flex flex-col items-center justify-center leading-none text-gray-950 font-black text-xs">
+                      <span>{event.date?.split(' ')[0]}</span>
+                      <span className="text-[9px] font-bold mt-0.5 text-gray-700">{event.date?.split(' ')[1]}</span>
+                    </div>
                   </div>
+                  <button onClick={(e) => toggleLike(event.id, e)} className="absolute top-3 right-3 w-10 h-10 bg-black/20 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all hover:bg-black/40 z-10">
+                    <Heart size={18} className={likedEvents.includes(event.id) ? "fill-red-500 text-red-500" : "text-white"} />
+                  </button>
                 </div>
-                <button onClick={(e) => toggleLike(event.id, e)} className="absolute top-3 right-3 w-10 h-10 bg-black/20 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all hover:bg-black/40 z-10">
-                  <Heart size={18} className={likedEvents.includes(event.id) ? "fill-red-500 text-red-500" : "text-white"} />
-                </button>
-              </div>
-              <div className="p-5">
-                <h3 className="font-black text-lg tracking-tight text-gray-900 truncate mb-1">{event.title}</h3>
-                <div className="flex items-center gap-1.5 text-xs text-gray-400 font-semibold mb-4">
-                  <MapPin size={14} className="text-gray-400" />
-                  <span className="truncate">{event.city}</span>
+                <div className="p-5">
+                  <h3 className="font-black text-lg tracking-tight text-gray-900 truncate mb-1">{event.title}</h3>
+                  <div className="flex items-center gap-1.5 text-xs text-gray-400 font-semibold mb-4">
+                    <MapPin size={14} className="text-gray-400" />
+                    <span className="truncate">{event.city}</span>
+                  </div>
+                  <div className="text-lg font-black text-[#7c3aed]">{event.price}</div>
                 </div>
-                <div className="text-lg font-black text-[#7c3aed]">{event.price}</div>
-              </div>
-            </Link>
-          ))}
-        </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-3 gap-10 items-start">
         <div className="col-span-2">
           <h2 className="text-2xl font-black tracking-tight text-gray-900 mb-6">Recommandé pour vous</h2>
-          <div className="grid grid-cols-2 gap-4">
-            {filteredEvents.map(event => (
-              <Link to={`/event/${event.id}`} key={event.id} className="bg-white rounded-2xl p-4 flex gap-4 items-center shadow-sm border border-gray-100/50 hover:border-[#7c3aed]/30 hover:shadow-md transition-all group">
-                <img src={event.image} alt={event.title} className="w-24 h-24 rounded-xl object-cover group-hover:scale-105 transition-transform" />
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-black text-base tracking-tight text-gray-900 truncate mb-1">{event.title}</h3>
-                  <div className="flex items-center gap-1 text-xs text-gray-400 font-semibold mb-2">
-                    <MapPin size={12} />
-                    <span className="truncate">{event.city}</span>
+          
+          {loading ? (
+            <div className="py-6"><p className="text-gray-400 font-bold">Chargement des recommandations...</p></div>
+          ) : filteredEvents.length === 0 ? (
+            <div className="py-6"><p className="text-gray-400 font-bold">Rien à vous recommander pour le moment.</p></div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              {filteredEvents?.map(event => (
+                <Link to={`/event/${event.id}`} key={event.id} className="bg-white rounded-2xl p-4 flex gap-4 items-center shadow-sm border border-gray-100/50 hover:border-[#7c3aed]/30 hover:shadow-md transition-all group">
+                  <img src={event.image} alt={event.title} className="w-24 h-24 rounded-xl object-cover group-hover:scale-105 transition-transform" />
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-black text-base tracking-tight text-gray-900 truncate mb-1">{event.title}</h3>
+                    <div className="flex items-center gap-1 text-xs text-gray-400 font-semibold mb-2">
+                      <MapPin size={12} />
+                      <span className="truncate">{event.city}</span>
+                    </div>
+                    <span className="inline-block bg-[#F5EFFF] text-[#7c3aed] font-bold text-[10px] px-2 py-1 rounded-md tracking-wide">{event.tag || "DJ SET"}</span>
                   </div>
-                  <span className="inline-block bg-[#F5EFFF] text-[#7c3aed] font-bold text-[10px] px-2 py-1 rounded-md tracking-wide">{event.tag || "DJ SET"}</span>
-                </div>
-                <div className="text-right flex flex-col items-end justify-between h-full py-1">
-                  <span className="text-base font-black text-[#7c3aed] mb-4">{event.price}</span>
-                  <button onClick={(e) => toggleLike(event.id, e)} className="text-gray-300 hover:text-red-500 transition-colors">
-                    <Heart size={18} className={likedEvents.includes(event.id) ? "fill-red-500 text-red-500" : ""} />
-                  </button>
-                </div>
-              </Link>
-            ))}
-          </div>
+                  <div className="text-right flex flex-col items-end justify-between h-full py-1">
+                    <span className="text-base font-black text-[#7c3aed] mb-4">{event.price}</span>
+                    <button onClick={(e) => toggleLike(event.id, e)} className="text-gray-300 hover:text-red-500 transition-colors">
+                      <Heart size={18} className={likedEvents.includes(event.id) ? "fill-red-500 text-red-500" : ""} />
+                    </button>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="col-span-1 mt-14 cursor-pointer hover:opacity-90 transition-opacity">
@@ -314,25 +323,46 @@ const DesktopHome = ({ searchQuery, setSearchQuery, selectedCategory, setSelecte
 // COMPOSANT PRINCIPAL (Bascule automatique Mobile / Desktop)
 // ============================================================================
 const Home = () => {
+  // --- NOUVEAUX ÉTATS POUR L'API ---
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+  
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Tout");
   const [likedEvents, setLikedEvents] = useState<number[]>([]);
   
-  // Bascule à 1024px de largeur d'écran (typiquement un ordinateur ou une tablette en paysage)
   const isDesktop = useMediaQuery("(min-width: 1024px)");
+
+  // --- APPEL API ---
+  useEffect(() => {
+    // Remplacer l'URL par l'endpoint final de ton backend
+    fetch(`${import.meta.env.VITE_API_URL}/evenements`)
+      .then((res) => res.json())
+      .then((data) => {
+        setEvents(data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Erreur lors de la récupération des évènements:", error);
+        setLoading(false);
+        // Si tu veux tester l'affichage sans backend, décommente la ligne ci-dessous et insère tes fausses données directement dans le useState
+        // setEvents([]); 
+      });
+  }, []);
 
   const toggleLike = (id: number, e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setLikedEvents(prev => prev.includes(id) ? prev.filter(eventId => eventId !== id) : [...prev, id]);
   };
 
-  const filteredEvents = eventsData.filter(event => {
+  // Le filtre s'applique désormais sur l'état "events" provenant de l'API
+  const filteredEvents = events.filter(event => {
     const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) || event.city.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === "Tout" || event.theme === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
-  const props = { searchQuery, setSearchQuery, selectedCategory, setSelectedCategory, filteredEvents, likedEvents, toggleLike };
+  const props = { searchQuery, setSearchQuery, selectedCategory, setSelectedCategory, filteredEvents, likedEvents, toggleLike, loading };
 
   return isDesktop ? <DesktopHome {...props} /> : <MobileHome {...props} />;
 };
