@@ -12,37 +12,13 @@ import ticketIcone from '../assets/ticket-icone.svg';
 const EventDetails = () => {
   const { id } = useParams();
   const [isLiked, setIsLiked] = useState(false);
-  
-  // 🟢 AJOUT DES STATES MANQUANTS POUR ÉVITER LE CRASH
-  const [apiEvent, setApiEvent] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
+    // Remonte en haut de la page au chargement
     window.scrollTo(0, 0);
+  }, []);
 
-    // 🟢 CORRECTION DE LA VARIABLE D'ENVIRONNEMENT ICI
-    fetch(`${import.meta.env.VITE_API_URL}/evenements/${id}`)
-      .then((res) => {
-        if (res.status === 404) throw new Error('not_found');
-        if (!res.ok) throw new Error('server_error');
-        return res.json();
-      })
-      .then((data) => {
-        setApiEvent(data); // Utilise apiEvent pour ne pas bloquer 'const event' plus bas
-        setLoading(false);
-      })
-      .catch((err) => {
-        if (err.message === 'not_found') {
-          setError('not_found');
-        } else {
-          setError('server_error');
-        }
-        setLoading(false);
-      });
-  }, [id]);
-
-  // Pour l'instant, ton affichage utilise tes données locales (mock)
+  // Recherche de l'événement directement dans tes données locales
   const event = allEvents.find(e => e.id === parseInt(id || ""));
 
   if (!event) {
@@ -54,7 +30,7 @@ const EventDetails = () => {
   }
 
   const fullAddress = `${event.location || 'La Sucrière'}, ${event.city || 'Lyon, France'}`;
-  const freeEmbedSrc = `https://maps.google.com/maps?q=${encodeURIComponent(fullAddress)}&t=&z=15&ie=UTF8&iwloc=&output=embed`; // Légère correction de l'URL Google Maps au passage
+  const freeEmbedSrc = `https://maps.google.com/maps?q=${encodeURIComponent(fullAddress)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
 
   return (
     <div className="w-full font-sans antialiased text-gray-900 relative">
