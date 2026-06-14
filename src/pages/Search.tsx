@@ -29,7 +29,10 @@ const recentEvents = [
 ];
 
 const Search = () => {
-  const [query, setQuery] = useState("");
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [query, setQuery] = useState('');
 
   const filteredEvents = recentEvents.filter(event => 
     event.title.toLowerCase().includes(query.toLowerCase()) ||
@@ -98,6 +101,12 @@ const Search = () => {
                       {event.tag}
                     </span>
                   </div>
+                  {event.time && (
+                    <div className="flex items-center gap-1">
+                      <Clock size={14} />
+                      <span>{event.time}</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Droite : Prix et Favoris */}

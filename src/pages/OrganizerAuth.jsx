@@ -17,7 +17,7 @@ const OrganizerAuth = ({ setIsLoggedIn, setIsOrganizer }) => {
     navigate('/organizer/dashboard');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Ici tu mettras ta logique d'appel API plus tard
@@ -45,6 +45,8 @@ const OrganizerAuth = ({ setIsLoggedIn, setIsOrganizer }) => {
         {/* Formulaire */}
         <div className="p-10">
           <form onSubmit={handleSubmit} className="space-y-5">
+            {error && <div className="text-red-500 text-sm font-bold text-center bg-red-50 p-3 rounded-xl">{error}</div>}
+            
             {!isLogin && (
               <div className="relative">
                 <User className="absolute left-4 top-3.5 text-gray-300" size={20} />
@@ -52,7 +54,6 @@ const OrganizerAuth = ({ setIsLoggedIn, setIsOrganizer }) => {
                   type="text" 
                   placeholder="Nom de l'organisation" 
                   className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#1e2da7] font-medium"
-                  required 
                 />
               </div>
             )}
@@ -61,6 +62,8 @@ const OrganizerAuth = ({ setIsLoggedIn, setIsOrganizer }) => {
               <Mail className="absolute left-4 top-3.5 text-gray-300" size={20} />
               <input 
                 type="email" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Email professionnel" 
                 className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#1e2da7] font-medium"
                 required 
@@ -71,6 +74,8 @@ const OrganizerAuth = ({ setIsLoggedIn, setIsOrganizer }) => {
               <Lock className="absolute left-4 top-3.5 text-gray-300" size={20} />
               <input 
                 type="password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="Mot de passe" 
                 className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#1e2da7] font-medium"
                 required 

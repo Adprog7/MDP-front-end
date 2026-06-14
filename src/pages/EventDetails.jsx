@@ -15,6 +15,25 @@ const EventDetails = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+
+    fetch(`${API_URL}/evenements/${id}`)
+      .then((res) => {
+        if (res.status === 404) throw new Error('not_found');
+        if (!res.ok) throw new Error('server_error');
+        return res.json();
+      })
+      .then((data) => {
+        setEvent(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        if (err.message === 'not_found') {
+          setError('not_found');
+        } else {
+          setError('server_error');
+        }
+        setLoading(false);
+      });
   }, [id]);
 
   const event = allEvents.find(e => e.id === parseInt(id || ""));

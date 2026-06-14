@@ -24,11 +24,63 @@ const Payment = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    
+    // Charger les groupes depuis le localStorage
+    const savedGroups = localStorage.getItem('sparkup_groups');
+    if (savedGroups) {
+      const parsed = JSON.parse(savedGroups);
+      setGroups(parsed);
+      if (parsed.length > 0) {
+        setSelectedGroup(parsed[0]); // Sélectionner le premier groupe par défaut
+      }
+    }
   }, []);
 
   const handlePayment = () => {
     setLoading(true);
     setTimeout(() => {
+      // Si paiement par groupe, poster un message système dans le chat du groupe
+      if (selectedGroup && selectedMembers.length > 0) {
+        const memberNames = selectedMembers.map(mId => {
+          const member = selectedGroup.members.find(m => m.id === mId);
+          return member ? member.name : "Killian";
+        });
+
+        // Formater le message (ex: "Vous avez acheté 3 places pour Killian, Sarah et Hugo")
+        let namesText = memberNames.join(', ');
+        if (memberNames.length > 1) {
+          const lastCommaIndex = namesText.lastIndexOf(', ');
+          namesText = namesText.substring(0, lastCommaIndex) + ' et ' + namesText.substring(lastCommaIndex + 2);
+        }
+
+        const systemMessage = {
+          id: Date.now(),
+          text: `Vous avez acheté ${selectedMembers.length} places de prévente pour ${namesText}.`,
+          isGroupPaymentNotice: true,
+          timestamp: new Date().toISOString()
+        };
+
+        // Charger l'historique des messages du groupe
+        const chatKey = `chat_messages_${selectedGroup.id}`;
+        const existingMessages = JSON.parse(localStorage.getItem(chatKey)) || [];
+        const updatedMessages = [...existingMessages, systemMessage];
+        localStorage.setItem(chatKey, JSON.stringify(updatedMessages));
+
+        // Mettre à jour le dernier message du groupe dans la liste
+        const savedGroups = JSON.parse(localStorage.getItem('sparkup_groups')) || [];
+        const updatedGroups = savedGroups.map(g => {
+          if (g.id === selectedGroup.id) {
+            return {
+              ...g,
+              lastMsg: `Paiement groupé effectué par Moi pour ${selectedMembers.length} places !`,
+              time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+            };
+          }
+          return g;
+        });
+        localStorage.setItem('sparkup_groups', JSON.stringify(updatedGroups));
+      }
+
       navigate(`/payment-success?count=${count}`);
     }, 2000);
   };
