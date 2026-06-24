@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { MapPin, Search, X, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+// Pont API
+import api from '../services/api'; 
+
 import toutIcon from '../assets/tout.svg';
 import toutActifIcon from '../assets/tout-actif.svg';
 import concertsIcon from '../assets/concerts.svg';
@@ -17,39 +20,6 @@ import plusActifIcon from '../assets/plus-actif.svg';
 import starIcon from '../assets/star.svg';
 import organisateursBanniere from '../assets/organisateurs_bannière.svg';
 import encadreDateSvg from '../assets/encadre-evenement-date.svg';
-
-const eventsData = [
-  {
-    id: 1,
-    title: "SUMMER VIBES",
-    city: "Lyon, France",
-    theme: "Sport",
-    date: "24 MAI",
-    price: "25,00 €",
-    tag: "OUTDOOR",
-    image: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=500"
-  },
-  {
-    id: 2,
-    title: "TECHNO ROOM",
-    city: "Marseille, France",
-    theme: "Clubs",
-    date: "24 MAI",
-    price: "18,00 €",
-    tag: "DJ SET",
-    image: "https://images.unsplash.com/photo-1574391884720-bbc3740c59d1?q=80&w=500"
-  },
-  {
-    id: 3,
-    title: "GREEN FESTIVAL",
-    city: "Bordeaux, France",
-    theme: "Festivals",
-    date: "24 MAI",
-    price: "35,00 €",
-    tag: "ECO",
-    image: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?q=80&w=500"
-  }
-];
 
 const categories = [
   { id: "Tout", label: "Tout", iconDefault: toutIcon, iconActif: toutActifIcon },
@@ -74,20 +44,32 @@ const useMediaQuery = (query: string) => {
 };
 
 // --- TYPES TYPESCRIPT POUR LES PROPS ---
+type EventType = {
+  id: number;
+  title: string;
+  city: string;
+  theme: string;
+  date: string;
+  price: string;
+  tag: string;
+  image: string;
+};
+
 type HomeProps = {
   searchQuery: string;
   setSearchQuery: (val: string) => void;
   selectedCategory: string;
   setSelectedCategory: (val: string) => void;
-  filteredEvents: typeof eventsData;
+  filteredEvents: EventType[];
   likedEvents: number[];
   toggleLike: (id: number, e: React.MouseEvent<HTMLButtonElement>) => void;
+  isLoading?: boolean;
 };
 
 // ============================================================================
 // 📱 VUE MOBILE
 // ============================================================================
-const MobileHome = ({ searchQuery, setSearchQuery, selectedCategory, setSelectedCategory, filteredEvents, likedEvents, toggleLike }: HomeProps) => (
+const MobileHome = ({ searchQuery, setSearchQuery, selectedCategory, setSelectedCategory, filteredEvents, likedEvents, toggleLike, isLoading }: HomeProps) => (
   <div className="min-h-screen bg-[#FDFBF7] pt-4 pb-24 px-5 max-w-md mx-auto font-sans antialiased relative overflow-hidden">
     
     <div className="absolute top-0 left-0 right-0 h-96 pointer-events-none z-0 overflow-hidden">
@@ -134,33 +116,38 @@ const MobileHome = ({ searchQuery, setSearchQuery, selectedCategory, setSelected
             <img src={starIcon} alt="Étoile" className="w-5 h-5 object-contain" />
           </h2>
         </div>
-        <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-none" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-          {filteredEvents.map(event => (
-            <Link to={`/event/${event.id}`} key={event.id} className="min-w-[155px] w-[155px] bg-white rounded-[24px] overflow-hidden shadow-sm border border-gray-100/40 block flex-shrink-0 relative">
-              <div className="relative h-36 w-full">
-                <img src={event.image} alt={event.title} className="w-full h-full object-cover" />
-                <div className="absolute bottom-2 left-2 w-11 h-11 flex items-center justify-center select-none">
-                  <img src={encadreDateSvg} alt="" className="absolute inset-0 w-full h-full object-contain" />
-                  <div className="relative z-10 flex flex-col items-center justify-center leading-none text-gray-950 font-black text-[10px]">
-                    <span>{event.date.split(' ')[0]}</span>
-                    <span className="text-[7px] font-bold mt-0.5 text-gray-700">{event.date.split(' ')[1]}</span>
-                  </div>
+        
+        {isLoading ? (
+            <p className="text-gray-400 text-sm">Chargement des événements...</p>
+        ) : (
+            <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-none" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            {filteredEvents.map(event => (
+                <Link to={`/event/${event.id}`} key={event.id} className="min-w-[155px] w-[155px] bg-white rounded-[24px] overflow-hidden shadow-sm border border-gray-100/40 block flex-shrink-0 relative">
+                <div className="relative h-36 w-full">
+                    <img src={event.image} alt={event.title} className="w-full h-full object-cover" />
+                    <div className="absolute bottom-2 left-2 w-11 h-11 flex items-center justify-center select-none">
+                    <img src={encadreDateSvg} alt="" className="absolute inset-0 w-full h-full object-contain" />
+                    <div className="relative z-10 flex flex-col items-center justify-center leading-none text-gray-950 font-black text-[10px]">
+                        <span>{event.date.split(' ')[0]}</span>
+                        <span className="text-[7px] font-bold mt-0.5 text-gray-700">{event.date.split(' ')[1]}</span>
+                    </div>
+                    </div>
+                    <button onClick={(e) => toggleLike(event.id, e)} className="absolute top-3 right-3 w-7 h-7 bg-black/20 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-transform active:scale-95 z-10">
+                    <Heart size={14} className={likedEvents.includes(event.id) ? "fill-red-500 text-red-500" : "text-white"} />
+                    </button>
                 </div>
-                <button onClick={(e) => toggleLike(event.id, e)} className="absolute top-3 right-3 w-7 h-7 bg-black/20 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-transform active:scale-95 z-10">
-                  <Heart size={14} className={likedEvents.includes(event.id) ? "fill-red-500 text-red-500" : "text-white"} />
-                </button>
-              </div>
-              <div className="p-3">
-                <h3 className="font-black text-xs tracking-tight text-gray-900 truncate">{event.title}</h3>
-                <div className="flex items-center gap-0.5 text-[10px] text-gray-400 font-semibold mt-1">
-                  <MapPin size={10} className="text-gray-400" />
-                  <span className="truncate">{event.city}</span>
+                <div className="p-3">
+                    <h3 className="font-black text-xs tracking-tight text-gray-900 truncate">{event.title}</h3>
+                    <div className="flex items-center gap-0.5 text-[10px] text-gray-400 font-semibold mt-1">
+                    <MapPin size={10} className="text-gray-400" />
+                    <span className="truncate">{event.city}</span>
+                    </div>
+                    <div className="text-xs font-black text-[#7c3aed] mt-2">{event.price}</div>
                 </div>
-                <div className="text-xs font-black text-[#7c3aed] mt-2">{event.price}</div>
-              </div>
-            </Link>
-          ))}
-        </div>
+                </Link>
+            ))}
+            </div>
+        )}
       </div>
 
       <div className="mb-8 cursor-pointer hover:opacity-95 transition-opacity">
@@ -200,7 +187,7 @@ const MobileHome = ({ searchQuery, setSearchQuery, selectedCategory, setSelected
 // ============================================================================
 // 💻 VUE DESKTOP (Large, aérée et centrée)
 // ============================================================================
-const DesktopHome = ({ searchQuery, setSearchQuery, selectedCategory, setSelectedCategory, filteredEvents, likedEvents, toggleLike }: HomeProps) => (
+const DesktopHome = ({ searchQuery, setSearchQuery, selectedCategory, setSelectedCategory, filteredEvents, likedEvents, toggleLike, isLoading }: HomeProps) => (
   <div className="min-h-screen bg-[#FDFBF7] pt-12 pb-24 px-10 w-full font-sans antialiased relative overflow-hidden">
     
     <div className="absolute top-0 left-0 right-0 h-96 pointer-events-none z-0 overflow-hidden">
@@ -246,33 +233,38 @@ const DesktopHome = ({ searchQuery, setSearchQuery, selectedCategory, setSelecte
         <h2 className="text-3xl font-black tracking-tight text-gray-900 flex items-center gap-3 mb-8">
           À la une <img src={starIcon} alt="Étoile" className="w-8 h-8 object-contain" />
         </h2>
-        <div className="grid grid-cols-4 gap-6">
-          {filteredEvents.map(event => (
-            <Link to={`/event/${event.id}`} key={event.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100/40 group hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-              <div className="relative h-48 w-full overflow-hidden">
-                <img src={event.image} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                <div className="absolute bottom-3 left-3 w-14 h-14 flex items-center justify-center select-none">
-                  <img src={encadreDateSvg} alt="" className="absolute inset-0 w-full h-full object-contain" />
-                  <div className="relative z-10 flex flex-col items-center justify-center leading-none text-gray-950 font-black text-xs">
-                    <span>{event.date.split(' ')[0]}</span>
-                    <span className="text-[9px] font-bold mt-0.5 text-gray-700">{event.date.split(' ')[1]}</span>
-                  </div>
+        
+        {isLoading ? (
+            <p className="text-gray-400 text-center">Chargement des événements...</p>
+        ) : (
+            <div className="grid grid-cols-4 gap-6">
+            {filteredEvents.map(event => (
+                <Link to={`/event/${event.id}`} key={event.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100/40 group hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                <div className="relative h-48 w-full overflow-hidden">
+                    <img src={event.image} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <div className="absolute bottom-3 left-3 w-14 h-14 flex items-center justify-center select-none">
+                    <img src={encadreDateSvg} alt="" className="absolute inset-0 w-full h-full object-contain" />
+                    <div className="relative z-10 flex flex-col items-center justify-center leading-none text-gray-950 font-black text-xs">
+                        <span>{event.date.split(' ')[0]}</span>
+                        <span className="text-[9px] font-bold mt-0.5 text-gray-700">{event.date.split(' ')[1]}</span>
+                    </div>
+                    </div>
+                    <button onClick={(e) => toggleLike(event.id, e)} className="absolute top-3 right-3 w-10 h-10 bg-black/20 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all hover:bg-black/40 z-10">
+                    <Heart size={18} className={likedEvents.includes(event.id) ? "fill-red-500 text-red-500" : "text-white"} />
+                    </button>
                 </div>
-                <button onClick={(e) => toggleLike(event.id, e)} className="absolute top-3 right-3 w-10 h-10 bg-black/20 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all hover:bg-black/40 z-10">
-                  <Heart size={18} className={likedEvents.includes(event.id) ? "fill-red-500 text-red-500" : "text-white"} />
-                </button>
-              </div>
-              <div className="p-5">
-                <h3 className="font-black text-lg tracking-tight text-gray-900 truncate mb-1">{event.title}</h3>
-                <div className="flex items-center gap-1.5 text-xs text-gray-400 font-semibold mb-4">
-                  <MapPin size={14} className="text-gray-400" />
-                  <span className="truncate">{event.city}</span>
+                <div className="p-5">
+                    <h3 className="font-black text-lg tracking-tight text-gray-900 truncate mb-1">{event.title}</h3>
+                    <div className="flex items-center gap-1.5 text-xs text-gray-400 font-semibold mb-4">
+                    <MapPin size={14} className="text-gray-400" />
+                    <span className="truncate">{event.city}</span>
+                    </div>
+                    <div className="text-lg font-black text-[#7c3aed]">{event.price}</div>
                 </div>
-                <div className="text-lg font-black text-[#7c3aed]">{event.price}</div>
-              </div>
-            </Link>
-          ))}
-        </div>
+                </Link>
+            ))}
+            </div>
+        )}
       </div>
 
       <div className="grid grid-cols-3 gap-10 items-start">
@@ -311,15 +303,51 @@ const DesktopHome = ({ searchQuery, setSearchQuery, selectedCategory, setSelecte
 );
 
 // ============================================================================
-// COMPOSANT PRINCIPAL (Bascule automatique Mobile / Desktop)
+// COMPOSANT PRINCIPAL (Logique & Appel API)
 // ============================================================================
 const Home = () => {
+  const [eventsData, setEventsData] = useState<EventType[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Tout");
   const [likedEvents, setLikedEvents] = useState<number[]>([]);
   
-  // Bascule à 1024px de largeur d'écran (typiquement un ordinateur ou une tablette en paysage)
   const isDesktop = useMediaQuery("(min-width: 1024px)");
+
+  // --- RÉCUPÉRATION DES ÉVÉNEMENTS ---
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await api.get('/evenements'); 
+        
+        const formattedEvents = response.data.map((ev: any) => {
+          const dateObj = new Date(ev.date_debut);
+          const day = dateObj.getDate();
+          const month = dateObj.toLocaleString('fr-FR', { month: 'short' }).toUpperCase();
+
+          return {
+            id: ev.id,
+            title: ev.titre || ev.title || "Titre inconnu",
+            city: ev.ville || ev.lieu || "Lieu inconnu",
+            theme: ev.theme || ev.categorie || "Tout",
+            date: `${day} ${month}`,
+            price: ev.prix ? `${ev.prix} €` : "À partir de 10 €", 
+            tag: ev.tag || "OUTDOOR", 
+            image: ev.photo || "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=500" // La modif est bien là !
+          };
+        });
+
+        setEventsData(formattedEvents);
+      } catch (error) {
+        console.error("Erreur lors de la récupération :", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
 
   const toggleLike = (id: number, e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -332,7 +360,7 @@ const Home = () => {
     return matchesSearch && matchesCategory;
   });
 
-  const props = { searchQuery, setSearchQuery, selectedCategory, setSelectedCategory, filteredEvents, likedEvents, toggleLike };
+  const props = { searchQuery, setSearchQuery, selectedCategory, setSelectedCategory, filteredEvents, likedEvents, toggleLike, isLoading };
 
   return isDesktop ? <DesktopHome {...props} /> : <MobileHome {...props} />;
 };

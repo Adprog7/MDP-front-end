@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import HeaderMobile from './components/HeaderMobile';
@@ -29,12 +29,24 @@ import EventCreationSuccess from './pages/EventCreationSuccess';
 import OrganizerSupport from './pages/OrganizerSupport'; 
 import TicketCount from './pages/TicketCount';
 import Notifications from './pages/Notifications';
-
+import api from './services/api';
 // Sous-composant pour accéder au hook useLocation
 function AppContent() {
   const location = useLocation();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isOrganizer, setIsOrganizer] = useState(false);
+  useEffect(() => {
+    const testerConnexion = async () => {
+      try {
+        const reponse = await api.get('/test-connexion'); 
+        console.log("🔥 Connexion réussie ! Voici les données :", reponse.data);
+      } catch (erreur) {
+        console.error("❌ Aïe, erreur de connexion avec le back :", erreur);
+      }
+    };
+
+    testerConnexion();
+  }, []);
 
   // Détection des pages pour masquer les menus
   const isEventDetailsPage = location.pathname.startsWith('/event/');
@@ -51,6 +63,9 @@ function AppContent() {
   const isGroupsPage = location.pathname.startsWith('/groups');
   const isChatPage = location.pathname.startsWith('/chat/');
   const isSettingsPage = location.pathname.startsWith('/settings');
+  const isOrganizerPages = location.pathname.startsWith('/organizer/login');
+  const isOrganizerProfilePage = location.pathname.startsWith('/organizer/profile');
+  const isOrganizerCreateEventPage = location.pathname.startsWith('/organizer/create');
 
   return (
     <div className="flex flex-col min-h-screen bg-[#FDFBF7] w-full font-sans antialiased relative overflow-hidden">
@@ -62,12 +77,12 @@ function AppContent() {
       </div>
 
       {/* 🟢 La Navbar s'affiche uniquement si on n'est pas sur ces pages */}
-      {!isEventDetailsPage && !isTicketCountTicket && !isPaymentPage && !isPaymentSuccessPage && !isNotificationsPage && !isChatPage && (
+      {!isEventDetailsPage && !isOrganizerCreateEventPage &&!isTicketCountTicket && !isPaymentPage && !isPaymentSuccessPage && !isNotificationsPage && !isChatPage && (
         <Navbar isLoggedIn={isLoggedIn} isOrganizer={isOrganizer}/>
       )}
 
       {/* 🟢 Le HeaderMobile s'affiche partout SAUF sur ces pages */}
-      {!isEventDetailsPage && !isTicketCountTicket && !isPaymentPage && !isPaymentSuccessPage && !isBilletsPage && !isTicketDetailPage && !isSearchPage && !isLoginPage && !isRegisterPage && !isAccountPage && !isNotificationsPage && !isGroupsPage && !isChatPage && !isSettingsPage && <HeaderMobile />}
+      {!isEventDetailsPage && !isTicketCountTicket && !isOrganizerCreateEventPage && !isOrganizerProfilePage && !isPaymentPage && !isPaymentSuccessPage && !isBilletsPage && !isOrganizerPages &&!isTicketDetailPage && !isSearchPage && !isLoginPage && !isRegisterPage && !isAccountPage && !isNotificationsPage && !isGroupsPage && !isChatPage && !isSettingsPage && <HeaderMobile />}
 
       <main className="flex-grow pb-20 md:pb-0 relative z-10">
         <Routes>
