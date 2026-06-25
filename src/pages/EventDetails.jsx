@@ -20,13 +20,10 @@ const EventDetails = () => {
   const [isLiked, setIsLiked] = useState(false);
 
   useEffect(() => {
-    // Remonte en haut de la page au chargement
-    window.scrollTo(0, 0);
-  }, []);
-
+    // 1. Définition de la fonction async DANS le useEffect
     const fetchEventDetail = async () => {
       try {
-        // On utilise l'instance 'api' importée en haut du fichier
+        setIsLoading(true); // On remet à true au cas où
         const response = await api.get(`/evenements/${id}`);
         setEvent(response.data);
       } catch (err) {
@@ -37,8 +34,11 @@ const EventDetails = () => {
       }
     };
 
-    fetchEventDetail();
-  }, [id]);
+    // 2. Appel de la fonction
+    if (id) {
+      fetchEventDetail();
+    }
+  }, [id]); // <--- Maintenant c'est parfaitement fermé et lié à l'id
 
   // ÉCRAN DE CHARGEMENT
   if (isLoading) {
@@ -162,16 +162,7 @@ const EventDetails = () => {
             </div>
           </div>
 
-          {/* Ligne 3 : Genres / Style (Statique pour le moment) */}
-          <div className="p-4 flex items-center gap-4">
-            <div className="text-[#8b44f7] flex-shrink-0">
-              <Music size={22} />
-            </div>
-            <div>
-              <p className="text-xs font-bold text-gray-900">Électro - House - Techno</p>
-              <p className="text-[11px] font-medium text-gray-400 mt-0.5">DJ Set - Live - Good vibes</p>
-            </div>
-          </div>
+
 
           {/* Ligne 4 : Section À Propos dynamique */}
           <div className="p-4">

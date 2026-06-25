@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search as SearchIcon, MapPin, Heart, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import api from '../services/api';  // Assurez-vous que le chemin est correct
 
 // Import de ton icône star
 import starSvg from '../assets/star.svg';
@@ -27,22 +28,29 @@ const Search = () => {
 
   // --- APPEL API ---
   useEffect(() => {
-    // Remplace "/evenements/recents" par ton vrai endpoint
-    fetch(`${import.meta.env.VITE_API_URL}/evenements/recents`)
-      .then((res) => {
-        if (!res.ok) throw new Error('Erreur réseau');
-        return res.json();
-      })
-      .then((data) => {
-        setEvents(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Erreur lors de la récupération des évènements :", err);
-        setError("Impossible de charger les évènements récents.");
-        setLoading(false);
-      });
-  }, []);
+  // On appelle '/evenements', qui est maintenant trié par date dans ton controller
+  api.get('/evenements')
+    .then((res) => {
+      // On transforme les données de Laravel pour qu'elles correspondent à ton type "Event"
+      const formattedEvents = res.data.map((item: any) => ({
+        id: item.id,
+        title: item.titre,          // Backend envoie 'titre'
+        location: item.lieu,        // Backend envoie 'lieu'
+        price: item.prix ? `${item.prix} €` : 'Gratuit',
+        tag: 'Actif',               // Valeur par défaut
+        tagBg: 'bg-green-100',
+        tagColor: 'text-green-600',
+        image: item.photo ? `http://localhost:8000/storage/${item.photo}` : 'https://via.placeholder.com/150',
+      }));
+      setEvents(formattedEvents);
+      setLoading(false);
+    })
+    .catch((err) => {
+      console.error("Erreur lors de la récupération des évènements :", err);
+      setError("Impossible de charger les évènements.");
+      setLoading(false);
+    });
+}, []);
 
   const filteredEvents = events?.filter(event => 
     event.title.toLowerCase().includes(query.toLowerCase()) ||

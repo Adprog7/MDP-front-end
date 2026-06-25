@@ -160,7 +160,7 @@ const MobileHome = ({ searchQuery, setSearchQuery, selectedCategory, setSelected
         </div>
         
         {/* Affichage conditionnel (Recommandé) */}
-        {loading ? (
+        {isLoading ? (
           <p className="text-sm text-gray-400 font-medium py-6 text-center w-full">Recherche de recommandations...</p>
         ) : filteredEvents.length === 0 ? (
           <p className="text-sm text-gray-400 font-medium py-6 text-center w-full">Rien à vous recommander pour le moment.</p>
@@ -279,7 +279,7 @@ const DesktopHome = ({ searchQuery, setSearchQuery, selectedCategory, setSelecte
         <div className="col-span-2">
           <h2 className="text-2xl font-black tracking-tight text-gray-900 mb-6">Recommandé pour vous</h2>
           
-          {loading ? (
+          {isLoading ? (
             <div className="py-6"><p className="text-gray-400 font-bold">Chargement des recommandations...</p></div>
           ) : filteredEvents.length === 0 ? (
             <div className="py-6"><p className="text-gray-400 font-bold">Rien à vous recommander pour le moment.</p></div>
@@ -370,9 +370,20 @@ const Home = () => {
   };
 
   // Le filtre s'applique désormais sur l'état "events" provenant de l'API
-  const filteredEvents = events.filter(event => {
-    const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) || event.city.toLowerCase().includes(searchQuery.toLowerCase());
+  // Utilise eventsData au lieu de events
+  const filteredEvents = eventsData.filter(event => {
+    // 1. Vérifie si le title/city existe avant de faire le toLowerCase
+    const title = event.title || "";
+    const city = event.city || "";
+    
+    // 2. Sécurise aussi la recherche
+    const query = searchQuery.toLowerCase() || "";
+    
+    const matchesSearch = title.toLowerCase().includes(query) || 
+                          city.toLowerCase().includes(query);
+                          
     const matchesCategory = selectedCategory === "Tout" || event.theme === selectedCategory;
+    
     return matchesSearch && matchesCategory;
   });
 

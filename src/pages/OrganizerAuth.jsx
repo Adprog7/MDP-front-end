@@ -65,7 +65,7 @@ const handleSubmit = async (e) => {
       
       setIsLoggedIn(true);
       setIsOrganizer(true);
-      navigate('/organizer/dashboard');
+      navigate('/organizer/profile');
     }
   } catch (err) {
     console.error("Erreur complète :", err);

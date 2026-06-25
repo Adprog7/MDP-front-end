@@ -22,18 +22,25 @@ const OrganizerProfile = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      try {
-        const [profileRes, eventsRes, statsRes] = await Promise.all([
-          api.get('/organizer/profile'),
-          api.get('/organizer/events'),
-          api.get('/organizer/stats')
-        ]);
+    try {
+      const [profileRes, eventsRes, statsRes] = await Promise.all([
+        api.get('/organizer/profile'),
+        api.get('/organizer/events'),
+        api.get('/organizer/stats')
+      ]);
 
-        setProfile(profileRes.data);
-        setEvents(eventsRes.data);
-        setStats(statsRes.data);
-        setLoading(false);
-      } catch (err) {
+      // AJOUTE CES LIGNES POUR VOIR LES DONNÉES
+      console.log("Profil reçu:", profileRes.data);
+      console.log("Événements reçus:", eventsRes.data);
+      console.log("Stats reçues:", statsRes.data);
+      // Ajoute ceci juste au début de ton composant OrganizerProfile
+      console.log("Tentative d'appel API avec le token :", localStorage.getItem('token'));
+
+      setProfile(profileRes.data);
+      setEvents(eventsRes.data);
+      setStats(statsRes.data);
+      setLoading(false);
+    } catch (err) {
         console.error("Erreur chargement profil:", err);
         setLoading(false);
       }
@@ -103,20 +110,29 @@ const OrganizerProfile = () => {
         <div className="space-y-3 mb-6">
           {events.map(event => (
             <div key={event.id} className="bg-white rounded-2xl p-3 flex gap-3 shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-50">
-              <img src={event.image && event.image.startsWith('http') ? event.image  : `http://localhost:8000/storage/${event.image}`} alt={event.title} className="w-20 h-20 rounded-xl object-cover flex-shrink-0" />
+              {/* 1. Change 'event.image' par 'event.image' (ou 'event.photo' si ton API renvoie photo) */}
+              <img 
+                src={event.image ? `http://localhost:8000/storage/${event.image}` : "https://ui-avatars.com/api/?name=" + event.title} 
+                alt={event.title} 
+                className="w-20 h-20 rounded-xl object-cover flex-shrink-0" 
+              />
+              
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-1 mb-1">
+                  {/* 2. Assure-toi que 'title' correspond à ce que ton Controller envoie */}
                   <h3 className="text-xs font-black text-gray-900 truncate">{event.title}</h3>
                   <span className={`text-[9px] font-black px-2 py-0.5 rounded-full flex-shrink-0 ${event.statusColor}`}>{event.status}</span>
                 </div>
+                
+                {/* 3. Affiche la date et le lieu */}
                 <p className="text-[10px] text-gray-400 font-medium mb-2">{event.date} · {event.lieu}</p>
+                
                 <div className="grid grid-cols-3 gap-1">
                   <div><p className="text-xs font-black text-gray-900">{event.vendus}</p><p className="text-[9px] text-gray-400 font-medium">Vendus</p></div>
                   <div><p className="text-xs font-black text-gray-900">{event.taux}</p><p className="text-[9px] text-gray-400 font-medium">Taux</p></div>
                   <div><p className="text-xs font-black text-gray-900">{event.revenus}</p><p className="text-[9px] text-gray-400 font-medium">Revenus</p></div>
                 </div>
               </div>
-              <button className="self-center p-1.5 hover:bg-gray-50 rounded-lg transition-colors flex-shrink-0"><Pencil size={14} className="text-gray-400" /></button>
             </div>
           ))}
         </div>
