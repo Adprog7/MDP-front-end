@@ -1,68 +1,134 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Mail, Building2, Save, LogOut, Camera } from 'lucide-react';
+import { Pencil, TrendingUp, Ticket, Tag, MessageSquare, Users, CreditCard, Settings, CalendarPlus } from 'lucide-react';
+import api from '../services/api'; // Assure-toi que le chemin est correct
+
+import sparkUpHeaderSvg from '../assets/spark-up-header.svg';
+import starSvg from '../assets/star.svg';
+import clocheActifSvg from '../assets/bouton-cloche-actif.svg';
+import clochePassifSvg from '../assets/bouton-cloche-passif.svg';
+import parametresSvg from '../assets/bouton-parametres.svg';
+import boutonModifierProfilSvg from '../assets/bouton-modifier-profil.svg';
 
 const OrganizerProfile = () => {
   const navigate = useNavigate();
+  const [hasNotification, setHasNotification] = useState(true);
+  
+  // États pour les données dynamiques
+  const [profile, setProfile] = useState(null);
+  const [events, setEvents] = useState([]);
+  const [stats, setStats] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [profileRes, eventsRes, statsRes] = await Promise.all([
+          api.get('/organizer/profile'),
+          api.get('/organizer/events'),
+          api.get('/organizer/stats')
+        ]);
+
+        setProfile(profileRes.data);
+        setEvents(eventsRes.data);
+        setStats(statsRes.data);
+        setLoading(false);
+      } catch (err) {
+        console.error("Erreur chargement profil:", err);
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
+
+  const outils = [
+    { label: "Créer un\névènement", icon: <CalendarPlus size={22} className="text-[#f5c000]" />, path: '/organizer/create' },
+    { label: "Statistiques\ndétaillées", icon: <TrendingUp size={22} className="text-[#f5c000]" />, path: '/organizer/stats' },
+    { label: "Gestion des\nbillets", icon: <Ticket size={22} className="text-[#f5c000]" />, path: '/organizer/tickets' },
+    { label: "Codes\npromo", icon: <Tag size={22} className="text-[#f5c000]" />, path: '/organizer/promo' },
+    { label: "Messages\norganisateur", icon: <MessageSquare size={22} className="text-[#f5c000]" />, path: '/organizer/messages' },
+    { label: "Participants\net listes", icon: <Users size={22} className="text-[#f5c000]" />, path: '/organizer/participants' },
+    { label: "Paiements\net revenus", icon: <CreditCard size={22} className="text-[#f5c000]" />, path: '/organizer/revenue' },
+    { label: "Paramètres\névènements", icon: <Settings size={22} className="text-[#f5c000]" />, path: '/organizer/settings' },
+  ];
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center">Chargement...</div>;
 
   return (
-    <div className="min-h-screen bg-[#f8f9fe] p-6 md:p-12 pb-32">
-      <div className="max-w-3xl mx-auto">
-        <button onClick={() => navigate('/organizer/dashboard')} className="flex items-center gap-2 text-gray-500 hover:text-[#1e2da7] font-bold mb-8 transition-colors">
-          <ArrowLeft size={20} /> Retour Dashboard
-        </button>
+    <div className="min-h-screen bg-[#FDFBF7] font-sans antialiased pb-32 relative overflow-x-hidden">
+      <div className="absolute top-0 left-0 right-0 h-96 pointer-events-none z-0 overflow-hidden">
+        <div className="absolute -top-10 -left-20 w-64 h-64 bg-[#FFF9C4]/60 rounded-full blur-3xl" />
+        <div className="absolute -top-14 -right-10 w-72 h-72 bg-purple-200/40 rounded-full blur-3xl" />
+      </div>
 
-        <div className="mb-10">
-          <h1 className="text-4xl font-black text-[#1e2da7] uppercase tracking-tighter italic">Mon Compte Pro</h1>
-          <p className="text-gray-500 font-bold">Gérez les informations de votre profil organisateur.</p>
+      <div className="relative z-10 px-5 pt-6">
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-2">
+            <img src={sparkUpHeaderSvg} alt="SparkUp" className="h-5 object-contain" />
+            <img src={starSvg} alt="Star" className="h-6 object-contain" />
+          </div>
+          <div className="flex items-center gap-3">
+            <button onClick={() => navigate('/notifications')} className="active:scale-95 transition-transform">
+              <img src={hasNotification ? clocheActifSvg : clochePassifSvg} alt="Notifications" className="w-11 h-11 object-contain" />
+            </button>
+            <button onClick={() => navigate('/settings')} className="active:scale-95 transition-transform">
+              <img src={parametresSvg} alt="Paramètres" className="w-11 h-11 object-contain" />
+            </button>
+          </div>
         </div>
 
-        <div className="bg-white rounded-[3rem] p-8 md:p-10 shadow-xl border border-gray-100">
-          {/* --- PHOTO DE PROFIL / LOGO --- */}
-          <div className="flex flex-col items-center mb-10">
-            <div className="relative group">
-              <div className="w-32 h-32 bg-gray-100 rounded-[2.5rem] overflow-hidden border-4 border-white shadow-lg">
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Adrien" alt="Profile" className="w-full h-full object-cover" />
-              </div>
-              <button className="absolute bottom-0 right-0 bg-[#f06292] text-white p-3 rounded-2xl shadow-lg hover:scale-110 transition-transform">
-                <Camera size={18} />
-              </button>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <img src={profile?.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200"} alt="Profil" className="w-[72px] h-[72px] rounded-full object-cover shadow-sm" />
+            <div>
+              <h2 className="text-[22px] font-black text-gray-900 leading-tight">{profile?.nom_complet || "Chargement..."}</h2>
+              <p className="text-[13px] text-gray-500 font-medium">@{profile?.username || "organisateur"}</p>
+              <span className="inline-block mt-1 bg-[#FFF9C4] text-yellow-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Organisateur</span>
             </div>
-            <h2 className="mt-4 text-xl font-black text-[#1e2da7] uppercase">Adrien Macaire</h2>
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Organisateur Certifié</p>
           </div>
+          <button className="active:scale-95 transition-transform"><img src={boutonModifierProfilSvg} alt="Modifier" className="w-11 h-11 object-contain" /></button>
+        </div>
 
-          {/* --- FORMULAIRE --- */}
-          <form className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase text-gray-400 ml-4 tracking-widest">Nom complet / Agence</label>
-                <div className="relative">
-                  <Building2 className="absolute left-4 top-4 text-gray-300" size={18} />
-                  <input type="text" defaultValue="Adrien Macaire" className="w-full pl-12 pr-6 py-4 bg-gray-50 border border-transparent rounded-2xl font-bold focus:bg-white focus:border-[#1e2da7] outline-none transition-all" />
+        <div className="grid grid-cols-4 gap-2 mb-6">
+          {stats.map((s, i) => (
+            <div key={i} className="bg-white rounded-[20px] py-4 flex flex-col items-center justify-center shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-50">
+              <span className="text-[#f5c000] text-lg mb-1">{s.icon}</span>
+              <span className="font-black text-[15px] text-gray-900 leading-none mb-1">{s.value}</span>
+              <span className="text-[9px] text-gray-500 font-medium text-center leading-tight">{s.label}</span>
+            </div>
+          ))}
+        </div>
+
+        <h2 className="text-[15px] font-bold text-gray-900 mb-3">Mes évènements</h2>
+        <div className="space-y-3 mb-6">
+          {events.map(event => (
+            <div key={event.id} className="bg-white rounded-2xl p-3 flex gap-3 shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-50">
+              <img src={event.image && event.image.startsWith('http') ? event.image  : `http://localhost:8000/storage/${event.image}`} alt={event.title} className="w-20 h-20 rounded-xl object-cover flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-1 mb-1">
+                  <h3 className="text-xs font-black text-gray-900 truncate">{event.title}</h3>
+                  <span className={`text-[9px] font-black px-2 py-0.5 rounded-full flex-shrink-0 ${event.statusColor}`}>{event.status}</span>
+                </div>
+                <p className="text-[10px] text-gray-400 font-medium mb-2">{event.date} · {event.lieu}</p>
+                <div className="grid grid-cols-3 gap-1">
+                  <div><p className="text-xs font-black text-gray-900">{event.vendus}</p><p className="text-[9px] text-gray-400 font-medium">Vendus</p></div>
+                  <div><p className="text-xs font-black text-gray-900">{event.taux}</p><p className="text-[9px] text-gray-400 font-medium">Taux</p></div>
+                  <div><p className="text-xs font-black text-gray-900">{event.revenus}</p><p className="text-[9px] text-gray-400 font-medium">Revenus</p></div>
                 </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase text-gray-400 ml-4 tracking-widest">Email professionnel</label>
-                <div className="relative">
-                  <Mail className="absolute left-4 top-4 text-gray-300" size={18} />
-                  <input type="email" defaultValue="sparkupevents69@gmail.com" className="w-full pl-12 pr-6 py-4 bg-gray-50 border border-transparent rounded-2xl font-bold focus:bg-white focus:border-[#1e2da7] outline-none transition-all" />
-                </div>
-              </div>
+              <button className="self-center p-1.5 hover:bg-gray-50 rounded-lg transition-colors flex-shrink-0"><Pencil size={14} className="text-gray-400" /></button>
             </div>
+          ))}
+        </div>
 
-            <div className="pt-6 border-t border-gray-50 flex flex-col md:flex-row gap-4">
-              <button type="submit" className="flex-1 bg-[#1e2da7] text-white py-5 rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-[#f06292] transition-all shadow-lg shadow-blue-100">
-                <Save size={20} /> Enregistrer
-              </button>
-              <button 
-                onClick={() => navigate('/login')} 
-                className="flex-1 bg-red-50 text-red-500 py-5 rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-red-500 hover:text-white transition-all"
-              >
-                <LogOut size={20} /> Déconnexion
-              </button>
-            </div>
-          </form>
+        <h2 className="text-[15px] font-bold text-gray-900 mb-3">Outils organisateur</h2>
+        <div className="grid grid-cols-4 gap-2">
+          {outils.map((outil, i) => (
+            <button key={i} onClick={() => navigate(outil.path)} className="rounded-2xl p-3 flex flex-col items-center gap-2 transition-all active:scale-95">
+              <div className="w-12 h-12 bg-[#FFF9C4] rounded-2xl flex items-center justify-center">{outil.icon}</div>
+              <span className="text-[9px] font-bold text-gray-600 text-center leading-tight whitespace-pre-line">{outil.label}</span>
+            </button>
+          ))}
         </div>
       </div>
     </div>

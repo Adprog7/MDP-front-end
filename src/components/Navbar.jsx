@@ -14,12 +14,6 @@ const Navbar = ({ isLoggedIn, isOrganizer }) => {
   ];
 
 
-  // 3. Item "Messages" (Uniquement si connecté)
-  if (isLoggedIn) {
-    if (isOrganizer) {
-      navItems.push({ label: 'Messages', icon: <MessageSquare size={24} />, path: '/groups' });
-    }
-  }
 
   // 4. Configuration du Bouton Dynamique (Connexion / Compte)
   let authPath = '/login';
