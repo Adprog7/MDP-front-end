@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // Import de ton bouton retour
@@ -7,44 +7,29 @@ import boutonRetourSvg from '../assets/bouton-retour.svg';
 const Notifications = () => {
   const navigate = useNavigate();
 
-  // Les données exactes de ta capture d'écran
-  const notificationsList = [
-    {
-      id: 1,
-      title: "Plus d'excuse pour ne pas venir 😎",
-      description: "Alexis vient de vous réserver une place pour Soirée After School. Retrouvez votre billet dans Mes billets.",
-      footer: "Il y a 2 min / Réservation groupe",
-      dateSeparator: null
-    },
-    {
-      id: 2,
-      title: "Summer Vibes approche 🎶",
-      description: "L'événement que vous avez ajouté à vos favoris aura lieu dans 7 jours.",
-      footer: "Il y a 2 jours / Favoris",
-      dateSeparator: "Lun 22 Mai"
-    },
-    {
-      id: 3,
-      title: "Un billet est disponible pour Techno Room 🎟️",
-      description: "Un participant vient de mettre sa place en revente.",
-      footer: "Il y a 2 jours / revente",
-      dateSeparator: null
-    },
-    {
-      id: 4,
-      title: "Lucas vous invite à rejoindre Festival Squad 👥",
-      description: "Acceptez l'invitation pour réserver vos prochaines sorties en groupe.",
-      footer: "Il y a 2 jours / Invitation",
-      dateSeparator: null
-    },
-    {
-      id: 5,
-      title: "Votre réservation pour After School est confirmée 🎉",
-      description: "Votre billet est disponible dans Mes billets. Vous pourrez le transférer à un ami ou le revendre si l'événement l'autorise.",
-      footer: "Il y a 3 jours / Réservation",
-      dateSeparator: null
-    }
-  ];
+  // --- ÉTATS VIDES PRÊTS POUR L'API ---
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  // --- APPEL API ---
+  useEffect(() => {
+    // Remplace par ton endpoint (ex: /user/notifications)
+    fetch(`${import.meta.env.VITE_API_URL}/notifications`)
+      .then((res) => {
+        if (!res.ok) throw new Error('Erreur lors du chargement des notifications');
+        return res.json();
+      })
+      .then((data) => {
+        setNotifications(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setError("Impossible de charger vos notifications.");
+        setLoading(false);
+      });
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] font-sans antialiased relative overflow-hidden pb-10">
@@ -75,31 +60,47 @@ const Notifications = () => {
 
       {/* ─── LISTE DES NOTIFICATIONS ─── */}
       <div className="relative z-10 px-5 flex flex-col gap-3">
-        {notificationsList.map((notif) => (
-          <React.Fragment key={notif.id}>
-            
-            {/* Séparateur de date conditionnel */}
-            {notif.dateSeparator && (
-              <div className="text-center text-[11px] text-[#A399B2] font-medium my-1">
-                {notif.dateSeparator}
+        {loading ? (
+          <div className="text-center py-20">
+            <p className="text-gray-400 font-bold uppercase text-xs">Chargement...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-20">
+            <p className="text-red-400 font-bold uppercase text-xs">{error}</p>
+          </div>
+        ) : notifications.length > 0 ? (
+          notifications.map((notif) => (
+            <React.Fragment key={notif.id}>
+              
+              {/* Séparateur de date conditionnel */}
+              {notif.dateSeparator && (
+                <div className="text-center text-[11px] text-[#A399B2] font-medium my-1">
+                  {notif.dateSeparator}
+                </div>
+              )}
+              
+              {/* Carte Notification */}
+              <div className="bg-white rounded-[20px] p-4 shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-50 active:scale-[0.99] transition-transform">
+                <h3 className="text-[14px] font-black text-gray-900 leading-tight mb-1">
+                  {notif.title}
+                </h3>
+                <p className="text-[13px] text-gray-600 leading-snug font-medium mb-4">
+                  {notif.description}
+                </p>
+                <span className="text-[10px] text-gray-400 font-medium">
+                  {notif.footer}
+                </span>
               </div>
-            )}
-            
-            {/* Carte Notification */}
-            <div className="bg-white rounded-[20px] p-4 shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-50 active:scale-[0.99] transition-transform">
-              <h3 className="text-[14px] font-black text-gray-900 leading-tight mb-1">
-                {notif.title}
-              </h3>
-              <p className="text-[13px] text-gray-600 leading-snug font-medium mb-4">
-                {notif.description}
-              </p>
-              <span className="text-[10px] text-gray-400 font-medium">
-                {notif.footer}
-              </span>
-            </div>
-            
-          </React.Fragment>
-        ))}
+              
+            </React.Fragment>
+          ))
+        ) : (
+          <div className="text-center py-20">
+            <p className="text-gray-400 font-bold uppercase text-xs">
+              Aucune notification
+            </p>
+          </div>
+        )}
       </div>
 
     </div>

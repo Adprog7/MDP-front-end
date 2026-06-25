@@ -1,7 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { QrCode, Share, RefreshCcw, MoreHorizontal } from 'lucide-react';
-import { allEvents } from '../data/events';
 import boutonRetourSvg from '../assets/bouton-retour.svg';
 
 const TicketDetail = () => {
@@ -12,9 +11,26 @@ const TicketDetail = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
 
-  if (!event) return <div className="p-20 text-center font-bold">Billet introuvable</div>;
+    // Appel API pour récupérer le détail d'un billet précis
+    fetch(`${import.meta.env.VITE_API_URL}/billets/${id}`)
+      .then((res) => {
+        if (!res.ok) throw new Error('Billet introuvable');
+        return res.json();
+      })
+      .then((data) => {
+        setTicket(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setError("Impossible de charger le ticket.");
+        setLoading(false);
+      });
+  }, [id]);
+
+  if (loading) return <div className="p-20 text-center font-bold">Chargement du billet...</div>;
+  if (error || !ticket) return <div className="p-20 text-center font-bold text-red-500">{error || "Billet introuvable"}</div>;
 
   // Fonctions de formatage : retournent une chaîne vide si la date est manquante ou invalide
   const formatDate = (dateString) => {
@@ -90,7 +106,6 @@ const TicketDetail = () => {
           <span className="text-[9px] font-bold text-gray-900 uppercase">Plus</span>
         </button>
       </div>
-
     </div>
   );
 };

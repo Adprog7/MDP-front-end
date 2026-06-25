@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   TrendingUp, 
-  Zap, // Remplaçant pour l'engagement
+  Zap, 
   Ticket, 
   PlusCircle, 
   ArrowUpRight, 
@@ -13,19 +13,22 @@ import axios from 'axios';
 
 const OrganizerDashboard = () => {
   const navigate = useNavigate();
-  const [statsData, setStatsData] = useState(null);
+  
+  // --- ÉTATS DYNAMIQUES ---
+  const [statsData, setStatsData] = useState({ revenue: {}, tickets: {}, engagement: {} });
   const [myEvents, setMyEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Utilisation d'un ID statique pour le test, à remplacer par l'ID réel depuis l'auth
+  // ID statique pour le test, à remplacer par l'ID réel via ton AuthContext
   const organizerId = 1; 
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const [statsRes, eventsRes] = await Promise.all([
-          axios.get(`http://localhost:8000/api/organizer/${organizerId}/dashboard-stats`),
-          axios.get(`http://localhost:8000/api/organizer/${organizerId}/events`)
+          axios.get(`${import.meta.env.VITE_API_URL}/organizer/${organizerId}/dashboard-stats`),
+          axios.get(`${import.meta.env.VITE_API_URL}/organizer/${organizerId}/events`)
         ]);
         setStatsData(statsRes.data);
         setMyEvents(eventsRes.data);
@@ -37,13 +40,16 @@ const OrganizerDashboard = () => {
     };
     
     fetchData();
-  }, []);
+  }, [organizerId]);
 
+  // Configuration des cartes de statistiques
   const stats = [
-    { id: 1, label: 'Chiffre d\'affaires', value: statsData?.revenue?.value || '0€', icon: <TrendingUp size={24} />, color: 'text-green-600', bg: 'bg-green-100', trend: statsData?.revenue?.trend || '0%', path: '/organizer/stats/revenue' },
-    { id: 2, label: 'Billets vendus', value: statsData?.tickets?.value || '0', icon: <Ticket size={24} />, color: 'text-blue-600', bg: 'bg-blue-100', trend: statsData?.tickets?.trend || '0%', path: '/organizer/stats/tickets' },
-    { id: 3, label: 'Taux d\'engagement', value: statsData?.engagement?.value || '0%', icon: <Zap size={24} />, color: 'text-pink-600', bg: 'bg-pink-100', trend: statsData?.engagement?.trend || '0%', path: '/organizer/stats/engagement' },
+    { id: 1, label: 'Chiffre d\'affaires', value: statsData.revenue.value || '0€', icon: <TrendingUp size={24} />, color: 'text-green-600', bg: 'bg-green-100', trend: statsData.revenue.trend || '0%', path: '/organizer/stats/revenue' },
+    { id: 2, label: 'Billets vendus', value: statsData.tickets.value || '0', icon: <Ticket size={24} />, color: 'text-blue-600', bg: 'bg-blue-100', trend: statsData.tickets.trend || '0%', path: '/organizer/stats/tickets' },
+    { id: 3, label: 'Taux d\'engagement', value: statsData.engagement.value || '0%', icon: <Zap size={24} />, color: 'text-pink-600', bg: 'bg-pink-100', trend: statsData.engagement.trend || '0%', path: '/organizer/stats/engagement' },
   ];
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center font-black">Chargement du dashboard...</div>;
 
   return (
     <div className="min-h-screen bg-[#f8f9fe] p-6 md:p-12 pb-24 md:pb-12">
@@ -55,19 +61,6 @@ const OrganizerDashboard = () => {
             <h1 className="text-4xl font-black text-[#1e2da7] uppercase tracking-tighter italic">Dashboard</h1>
             <p className="text-gray-500 font-bold mt-1 text-sm md:text-base">Suivez vos performances et gérez vos évènements SparkUp.</p>
           </div>
-          <div>
-            <div className="flex items-center gap-4 mt-1">
-            <p className="text-gray-500 font-bold">Gestion Pro</p>
-            <span className="text-gray-200">|</span>
-            {/* BOUTON VERS LE SUPPORT */}
-            <button 
-                onClick={() => navigate('/organizer/support')}
-                className="text-[#f06292] font-black uppercase text-[10px] tracking-widest hover:underline"
-            >
-                Besoin d'aide ?
-            </button>
-            </div>
-        </div>
           <button 
             onClick={() => navigate('/organizer/create')}
             className="w-full md:w-auto flex items-center justify-center gap-3 bg-[#1e2da7] text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-blue-100 hover:bg-[#f06292] hover:scale-105 active:scale-95 transition-all"
@@ -92,15 +85,9 @@ const OrganizerDashboard = () => {
                   <p className="text-gray-400 font-black uppercase text-[10px] tracking-widest mb-1">{stat.label}</p>
                   <h3 className="text-3xl font-black text-gray-900 group-hover:text-[#1e2da7] transition-colors">{stat.value}</h3>
                 </div>
-                <div className="flex flex-col items-end gap-2">
-                  <span className="text-green-500 font-bold text-sm flex items-center gap-1 bg-green-50 px-2 py-1 rounded-lg">
-                    {stat.trend} <ArrowUpRight size={14} />
-                  </span>
-                </div>
-              </div>
-              {/* Overlay discret au survol */}
-              <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#1e2da7]">
-                <ArrowUpRight size={24} />
+                <span className="text-green-500 font-bold text-sm flex items-center gap-1 bg-green-50 px-2 py-1 rounded-lg">
+                  {stat.trend} <ArrowUpRight size={14} />
+                </span>
               </div>
             </div>
           ))}
@@ -114,7 +101,7 @@ const OrganizerDashboard = () => {
           </div>
 
           <div className="space-y-4">
-            {myEvents.map((event) => (
+            {myEvents.length > 0 ? myEvents.map((event) => (
               <div 
                 key={event.id} 
                 onClick={() => navigate(`/organizer/event/${event.id}`)}
@@ -141,15 +128,16 @@ const OrganizerDashboard = () => {
                       />
                     </div>
                   </div>
-                  <div className="p-3 bg-white text-gray-400 rounded-xl border border-gray-100 group-hover:bg-[#1e2da7] group-hover:text-white group-hover:rotate-45 transition-all">
+                  <div className="p-3 bg-white text-gray-400 rounded-xl border border-gray-100 group-hover:bg-[#1e2da7] group-hover:text-white transition-all">
                     <ArrowUpRight size={20} />
                   </div>
                 </div>
               </div>
-            ))}
+            )) : (
+              <p className="text-center text-gray-400 font-bold py-10">Aucun évènement pour le moment.</p>
+            )}
           </div>
         </div>
-
       </div>
     </div>
   );

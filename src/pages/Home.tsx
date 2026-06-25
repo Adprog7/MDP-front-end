@@ -158,27 +158,35 @@ const MobileHome = ({ searchQuery, setSearchQuery, selectedCategory, setSelected
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-extrabold tracking-tight text-gray-900">Recommandé pour vous</h2>
         </div>
-        <div className="space-y-3">
-          {filteredEvents.map(event => (
-            <Link to={`/event/${event.id}`} key={event.id} className="bg-white rounded-2xl p-2 flex gap-3 items-center shadow-sm border border-gray-50/50 hover:border-gray-100 transition-all">
-              <img src={event.image} alt={event.title} className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <h3 className="font-black text-xs tracking-tight text-gray-900 truncate">{event.title}</h3>
-                <div className="flex items-center gap-0.5 text-[10px] text-gray-400 font-semibold mt-0.5">
-                  <MapPin size={10} />
-                  <span className="truncate">{event.city}</span>
+        
+        {/* Affichage conditionnel (Recommandé) */}
+        {loading ? (
+          <p className="text-sm text-gray-400 font-medium py-6 text-center w-full">Recherche de recommandations...</p>
+        ) : filteredEvents.length === 0 ? (
+          <p className="text-sm text-gray-400 font-medium py-6 text-center w-full">Rien à vous recommander pour le moment.</p>
+        ) : (
+          <div className="space-y-3">
+            {filteredEvents?.map(event => (
+              <Link to={`/event/${event.id}`} key={event.id} className="bg-white rounded-2xl p-2 flex gap-3 items-center shadow-sm border border-gray-50/50 hover:border-gray-100 transition-all">
+                <img src={event.image} alt={event.title} className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-black text-xs tracking-tight text-gray-900 truncate">{event.title}</h3>
+                  <div className="flex items-center gap-0.5 text-[10px] text-gray-400 font-semibold mt-0.5">
+                    <MapPin size={10} />
+                    <span className="truncate">{event.city}</span>
+                  </div>
+                  <span className="inline-block bg-[#F5EFFF] text-[#7c3aed] font-bold text-[9px] px-1.5 py-0.5 rounded-md mt-1.5 tracking-wide">{event.tag || "DJ SET"}</span>
                 </div>
-                <span className="inline-block bg-[#F5EFFF] text-[#7c3aed] font-bold text-[9px] px-1.5 py-0.5 rounded-md mt-1.5 tracking-wide">{event.tag || "DJ SET"}</span>
-              </div>
-              <div className="text-right pr-2 flex flex-col items-end justify-between h-14 py-1 flex-shrink-0">
-                <span className="text-xs font-black text-[#7c3aed]">{event.price}</span>
-                <button onClick={(e) => toggleLike(event.id, e)} className="text-gray-300 hover:text-red-500 transition-colors">
-                  <Heart size={14} className={likedEvents.includes(event.id) ? "fill-red-500 text-red-500" : ""} />
-                </button>
-              </div>
-            </Link>
-          ))}
-        </div>
+                <div className="text-right pr-2 flex flex-col items-end justify-between h-14 py-1 flex-shrink-0">
+                  <span className="text-xs font-black text-[#7c3aed]">{event.price}</span>
+                  <button onClick={(e) => toggleLike(event.id, e)} className="text-gray-300 hover:text-red-500 transition-colors">
+                    <Heart size={14} className={likedEvents.includes(event.id) ? "fill-red-500 text-red-500" : ""} />
+                  </button>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   </div>
@@ -270,27 +278,34 @@ const DesktopHome = ({ searchQuery, setSearchQuery, selectedCategory, setSelecte
       <div className="grid grid-cols-3 gap-10 items-start">
         <div className="col-span-2">
           <h2 className="text-2xl font-black tracking-tight text-gray-900 mb-6">Recommandé pour vous</h2>
-          <div className="grid grid-cols-2 gap-4">
-            {filteredEvents.map(event => (
-              <Link to={`/event/${event.id}`} key={event.id} className="bg-white rounded-2xl p-4 flex gap-4 items-center shadow-sm border border-gray-100/50 hover:border-[#7c3aed]/30 hover:shadow-md transition-all group">
-                <img src={event.image} alt={event.title} className="w-24 h-24 rounded-xl object-cover group-hover:scale-105 transition-transform" />
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-black text-base tracking-tight text-gray-900 truncate mb-1">{event.title}</h3>
-                  <div className="flex items-center gap-1 text-xs text-gray-400 font-semibold mb-2">
-                    <MapPin size={12} />
-                    <span className="truncate">{event.city}</span>
+          
+          {loading ? (
+            <div className="py-6"><p className="text-gray-400 font-bold">Chargement des recommandations...</p></div>
+          ) : filteredEvents.length === 0 ? (
+            <div className="py-6"><p className="text-gray-400 font-bold">Rien à vous recommander pour le moment.</p></div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              {filteredEvents?.map(event => (
+                <Link to={`/event/${event.id}`} key={event.id} className="bg-white rounded-2xl p-4 flex gap-4 items-center shadow-sm border border-gray-100/50 hover:border-[#7c3aed]/30 hover:shadow-md transition-all group">
+                  <img src={event.image} alt={event.title} className="w-24 h-24 rounded-xl object-cover group-hover:scale-105 transition-transform" />
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-black text-base tracking-tight text-gray-900 truncate mb-1">{event.title}</h3>
+                    <div className="flex items-center gap-1 text-xs text-gray-400 font-semibold mb-2">
+                      <MapPin size={12} />
+                      <span className="truncate">{event.city}</span>
+                    </div>
+                    <span className="inline-block bg-[#F5EFFF] text-[#7c3aed] font-bold text-[10px] px-2 py-1 rounded-md tracking-wide">{event.tag || "DJ SET"}</span>
                   </div>
-                  <span className="inline-block bg-[#F5EFFF] text-[#7c3aed] font-bold text-[10px] px-2 py-1 rounded-md tracking-wide">{event.tag || "DJ SET"}</span>
-                </div>
-                <div className="text-right flex flex-col items-end justify-between h-full py-1">
-                  <span className="text-base font-black text-[#7c3aed] mb-4">{event.price}</span>
-                  <button onClick={(e) => toggleLike(event.id, e)} className="text-gray-300 hover:text-red-500 transition-colors">
-                    <Heart size={18} className={likedEvents.includes(event.id) ? "fill-red-500 text-red-500" : ""} />
-                  </button>
-                </div>
-              </Link>
-            ))}
-          </div>
+                  <div className="text-right flex flex-col items-end justify-between h-full py-1">
+                    <span className="text-base font-black text-[#7c3aed] mb-4">{event.price}</span>
+                    <button onClick={(e) => toggleLike(event.id, e)} className="text-gray-300 hover:text-red-500 transition-colors">
+                      <Heart size={18} className={likedEvents.includes(event.id) ? "fill-red-500 text-red-500" : ""} />
+                    </button>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="col-span-1 mt-14 cursor-pointer hover:opacity-90 transition-opacity">
@@ -354,7 +369,8 @@ const Home = () => {
     setLikedEvents(prev => prev.includes(id) ? prev.filter(eventId => eventId !== id) : [...prev, id]);
   };
 
-  const filteredEvents = eventsData.filter(event => {
+  // Le filtre s'applique désormais sur l'état "events" provenant de l'API
+  const filteredEvents = events.filter(event => {
     const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) || event.city.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === "Tout" || event.theme === selectedCategory;
     return matchesSearch && matchesCategory;

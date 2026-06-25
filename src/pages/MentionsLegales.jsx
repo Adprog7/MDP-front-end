@@ -26,8 +26,8 @@ const MentionsLegales = () => {
             En vertu de l'article 6 de la loi n° 2004-575 du 21 juin 2004 pour la confiance dans l'économie numérique, il est précisé aux utilisateurs du site <strong>SparkUp</strong> l'identité des différents intervenants dans le cadre de sa réalisation :
           </p>
           <ul className="list-disc ml-6 mt-2">
-            <li><strong>Propriétaire du site :</strong> Adrien Macaire - Étudiant Web Design</li>
-            <li><strong>Contact :</strong> adrien.macaire@example.com</li>
+            <li><strong>Propriétaire du site :</strong> Projet étudiant</li>
+            <li><strong>Contact :</strong> contact@sparkup-app.fr</li>
             <li><strong>Établissement :</strong> MyDigitalSchool Lyon</li>
           </ul>
         </section>
@@ -47,10 +47,10 @@ const MentionsLegales = () => {
         <section className="border-t border-gray-50 pt-10">
           <h2 className="text-xl font-black text-[#1e2da7] uppercase mb-4">3. Propriété intellectuelle</h2>
           <p>
-            Adrien Macaire est propriétaire des droits de propriété intellectuelle ou détient les droits d’usage sur tous les éléments accessibles sur le site, notamment les textes, images (sourcées via Unsplash), graphismes, logos et icônes.
+            Les droits de propriété intellectuelle sur les éléments du site sont détenus par l'éditeur du projet, sous réserve des droits d'usage sur les éléments graphiques (sourcés via Unsplash) ou iconographiques utilisés.
           </p>
           <p className="mt-2 text-sm italic">
-            Note : Les logos OL et PSG utilisés dans le cadre des démonstrations restent la propriété de leurs marques respectives.
+            Note : Les logos utilisés dans le cadre des démonstrations restent la propriété de leurs marques respectives.
           </p>
         </section>
 

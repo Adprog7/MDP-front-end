@@ -20,7 +20,9 @@ const EventDetails = () => {
   const [isLiked, setIsLiked] = useState(false);
 
   useEffect(() => {
+    // Remonte en haut de la page au chargement
     window.scrollTo(0, 0);
+  }, []);
 
     const fetchEventDetail = async () => {
       try {
