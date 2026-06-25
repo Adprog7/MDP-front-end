@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Image as ImageIcon, ChevronRight, Calendar, Clock, MapPin, Plus, Sparkles, List, LayoutGrid, Moon } from 'lucide-react';
+import api from '../services/api';
 
 const OrganizerCreateEvent = () => {
+  const [imageFile, setImageFile] = useState(null); // Ajoute cet état pour stocker le vrai fichier
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
@@ -10,30 +12,72 @@ const OrganizerCreateEvent = () => {
   const [tempBillet, setTempBillet] = useState({ nom: '', quantite: '', prix: '' });
   
   const [formData, setFormData] = useState({
-    titre: '', description: '', date: '', heure: '', lieu: '', categorie: '',
-    theme: 'Automatique', couleur: '#6D28D9',
-    billets: [
-      { id: 1, nom: 'Billet Standard', quantite: 400, prix: '25,00' },
-      { id: 2, nom: 'Billet VIP', quantite: 80, prix: '50,00' }
-    ]
-  });
+  titre: '', 
+  description: '', 
+  date_debut: '', // Doit correspondre à la BDD
+  date_fin: '',   // Doit correspondre à la BDD
+  lieu: '',
+  prix: 0,        // Ajouté pour la BDD
+  capacite: 0,    // Ajouté pour la BDD
+  theme: 'Automatique', 
+  couleur: '#6D28D9',
+  billets: [] 
+});
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
-  const handleImageChange = (e) => { if (e.target.files[0]) setPreview(URL.createObjectURL(e.target.files[0])); };
+  const handleImageChange = (e) => { 
+  if (e.target.files[0]) {
+    setImageFile(e.target.files[0]); // Stocke le vrai fichier
+    setPreview(URL.createObjectURL(e.target.files[0])); // Pour la prévisualisation
+  }
+};
 
   const saveBillet = () => {
-    if (tempBillet.nom && tempBillet.quantite && tempBillet.prix) {
-      setFormData({ ...formData, billets: [...formData.billets, { id: Date.now(), ...tempBillet }] });
-      setTempBillet({ nom: '', quantite: '', prix: '' });
-      setIsAdding(false);
-    }
-  };
+  if (tempBillet.nom && tempBillet.quantite && tempBillet.prix) {
+    const newBillets = [...formData.billets, { id: Date.now(), ...tempBillet }];
+    
+    // On met à jour les billets ET on définit le prix du billet principal
+    setFormData({ 
+      ...formData, 
+      billets: newBillets,
+      prix: tempBillet.prix // Met à jour le champ prix de l'évènement
+    });
+    
+    setTempBillet({ nom: '', quantite: '', prix: '' });
+    setIsAdding(false);
+  }
+};
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (step < 5) setStep(step + 1);
-    else { console.log("Final:", formData); navigate('/organizer/create-success'); }
-  };
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  if (step < 5) {
+    setStep(step + 1);
+  } else {
+    try {
+      const data = new FormData();
+      // Ajoute tous les champs du formData
+      Object.keys(formData).forEach(key => {
+        if (key === 'billets') {
+          data.append(key, JSON.stringify(formData[key]));
+        } else {
+          data.append(key, formData[key]);
+        }
+      });
+      // Ajoute l'image
+      if (imageFile) data.append('photo', imageFile);
+
+      const response = await api.post('/evenements/store', data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      console.log("Succès :", response.data);
+      navigate('/organizer/create-success');
+    } catch (err) {
+      console.error("Erreur d'envoi :", err.response?.data || err);
+    }
+  }
+};
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] p-6 pb-32">
@@ -55,22 +99,81 @@ const OrganizerCreateEvent = () => {
         <form onSubmit={handleSubmit}>
           {step === 1 && (
             <div className="space-y-4">
-              <div className="border-2 border-dashed border-purple-200 rounded-3xl p-8 flex flex-col items-center bg-purple-50/50 relative cursor-pointer">
-                <ImageIcon size={32} className="text-purple-400 mb-2" />
-                <input type="file" className="absolute inset-0 opacity-0" onChange={handleImageChange} />
-                <p className="text-xs font-bold text-purple-600 uppercase">Ajouter une image</p>
+              {/* Conteneur image corrigé avec l'input */}
+              <div className="border-2 border-dashed border-purple-200 rounded-3xl p-4 flex flex-col items-center justify-center bg-purple-50/50 relative cursor-pointer overflow-hidden h-64">
+                {preview ? (
+                  <img 
+                    src={preview} 
+                    alt="Prévisualisation" 
+                    className="w-full h-full object-contain" 
+                  />
+                ) : (
+                  <div className="flex flex-col items-center">
+                    <ImageIcon size={32} className="text-purple-400 mb-2" />
+                    <p className="text-xs font-bold text-purple-600 uppercase">Ajouter une image</p>
+                  </div>
+                )}
+                {/* C'EST CET INPUT QUI MANQUAIT ! */}
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  className="absolute inset-0 opacity-0 cursor-pointer" 
+                  onChange={handleImageChange} 
+                />
               </div>
-              <input name="titre" placeholder="Nom de l'évènement" className="w-full p-4 rounded-2xl border font-bold" onChange={handleChange} />
-            </div>
-          )}
 
-          {step === 2 && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-3 p-4 bg-white rounded-2xl border"><Calendar size={20} className="text-gray-400"/><input placeholder="Date" className="flex-1 font-bold" name="date" onChange={handleChange}/></div>
-              <div className="flex items-center gap-3 p-4 bg-white rounded-2xl border"><Clock size={20} className="text-gray-400"/><input placeholder="De 18:00 à 02:00" className="flex-1 font-bold" name="heure" onChange={handleChange}/></div>
-              <div className="flex items-center gap-3 p-4 bg-white rounded-2xl border"><MapPin size={20} className="text-gray-400"/><input placeholder="Lieu" className="flex-1 font-bold" name="lieu" onChange={handleChange}/></div>
+              <input 
+                name="titre" 
+                placeholder="Nom de l'évènement" 
+                className="w-full p-4 rounded-2xl border font-bold" 
+                onChange={handleChange} 
+              />
+              
+              <textarea 
+                name="description" 
+                placeholder="Description de l'évènement..." 
+                className="w-full p-4 rounded-2xl border font-bold h-32" 
+                onChange={handleChange} 
+              />
             </div>
           )}
+      {step === 2 && (
+        <div className="space-y-4">
+          <div className="p-4 bg-white rounded-2xl border">
+            <label className="block text-xs font-bold text-gray-500 mb-1">Date et heure de début</label>
+            <input 
+              type="datetime-local" 
+              className="w-full font-bold outline-none" 
+              name="date_debut" 
+              min={new Date().toISOString().slice(0, 16)} // Bloque les dates passées
+              onChange={handleChange} 
+            />
+          </div>
+
+    <div className="p-4 bg-white rounded-2xl border">
+      <label className="block text-xs font-bold text-gray-500 mb-1">Date et heure de fin</label>
+      <input 
+        type="datetime-local" 
+        className="w-full font-bold outline-none" 
+        name="date_fin" 
+        min={formData.date_debut || new Date().toISOString().slice(0, 16)} // Doit être après le début
+        onChange={handleChange} 
+      />
+    </div>
+
+    <div className="flex items-center gap-3 p-4 bg-white rounded-2xl border">
+      <MapPin size={20} className="text-gray-400"/>
+      {/* Ajout d'une aide pour le lieu */}
+      <input 
+        placeholder="Ville ou adresse complète" 
+        className="flex-1 font-bold outline-none" 
+        name="lieu" 
+        onChange={handleChange}
+      />
+    </div>
+    <p className="text-[10px] text-gray-400 italic">Indiquez une ville ou une adresse précise pour faciliter la recherche.</p>
+  </div>
+)}
 
           {step === 3 && (
             <div className="space-y-3">{['Concert', 'Festival', 'Soirée / Club', 'Sport', 'Conférence', 'Autre'].map(cat => (
@@ -147,7 +250,7 @@ const OrganizerCreateEvent = () => {
                 ))}
               </div>
               <div className="bg-white p-3 rounded-3xl shadow-lg border border-gray-100">
-                <div className="h-32 bg-gray-100 rounded-2xl mb-3 overflow-hidden">{preview && <img src={preview} className="w-full h-full object-cover"/>}</div>
+                <div className="h-32 bg-gray-100 rounded-2xl mb-3 overflow-hidden">{preview && <img src={preview} className="w-full h-full object-contain"/>}</div>
                 <div className="flex justify-between px-2 font-black"><span>{formData.titre || 'Titre'}</span> <span>{formData.billets[0]?.prix || '0'} €</span></div>
               </div>
             </div>

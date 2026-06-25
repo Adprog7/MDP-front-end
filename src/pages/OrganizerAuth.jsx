@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, User, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import api from '../services/api';
 
 const OrganizerAuth = ({ setIsLoggedIn, setIsOrganizer }) => {
   const navigate = useNavigate();
@@ -33,11 +34,46 @@ const OrganizerAuth = ({ setIsLoggedIn, setIsOrganizer }) => {
     navigate('/organizer/profile');
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
-    handleLoginSuccess();
-  };
+  // Remplace ton handleSubmit actuel par celui-ci :
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError(null);
+
+  try {
+    // 1. Choix de l'endpoint
+    const endpoint = isLogin ? 'organizer/login' : 'organizer/register';
+    
+    // 2. Préparation des données
+    const payload = isLogin 
+      ? { email: email, password: password } // Pour la connexion
+      : { 
+          prenom: firstName, 
+          nom: lastName, 
+          email: email, 
+          password: password, 
+          siret: siret, 
+          nom_structure: firstName + " " + lastName 
+        };
+
+    // 3. Envoi de la requête
+    const response = await api.post(endpoint, payload);
+
+    // 4. Gestion du succès
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('is_organizer', 'true');
+      
+      setIsLoggedIn(true);
+      setIsOrganizer(true);
+      navigate('/organizer/dashboard');
+    }
+  } catch (err) {
+    console.error("Erreur complète :", err);
+    // Affichage propre de l'erreur venant du backend
+    const msg = err.response?.data?.message || "Identifiants incorrects ou erreur serveur.";
+    setError(msg);
+  }
+};
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] font-sans antialiased relative overflow-hidden">

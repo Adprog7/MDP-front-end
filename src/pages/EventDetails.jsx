@@ -74,6 +74,8 @@ const EventDetails = () => {
 
   const fullAddress = `${event.lieu || 'Lieu inconnu'}`;
   const freeEmbedSrc = `https://maps.google.com/maps?q=${encodeURIComponent(fullAddress)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+  console.log("Voici l'objet événement complet :", event);
+  console.log("Voici l'objet organisateur :", event.organisateur);
 
   return (
     <div className="w-full font-sans antialiased text-gray-900 relative">
@@ -182,7 +184,7 @@ const EventDetails = () => {
             </div>
           </div>
 
-          {/* Ligne 5 : ORGANISÉ PAR */}
+          {/* Ligne 5 : ORGANISÉ PAR (Connecté à l'API) */}
           <div className="p-4">
             <h3 className="text-[10px] font-black text-gray-900 uppercase tracking-wider mb-3">
               Organisé par
@@ -190,18 +192,25 @@ const EventDetails = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-gray-200 rounded-full overflow-hidden flex-shrink-0">
-                  <img src="https://ui-avatars.com/api/?name=SparkUp+Events&background=8b44f7&color=fff" alt="Orga" className="w-full h-full object-cover" />
+                  {/* On utilise le nom de l'organisateur pour l'avatar */}
+                  <img 
+                    src={`https://ui-avatars.com/api/?name=${event.organisateur?.nom_structure || 'Orga'}&background=8b44f7&color=fff`} 
+                    alt="Orga" 
+                    className="w-full h-full object-cover" 
+                  />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-gray-900">SparkUp Events</p>
-                  <p className="text-[10px] font-semibold text-gray-400 mt-0.5">Organisateur vérifié</p>
+                  {/* C'EST ICI QU'ON AFFICHE LE VRAI NOM */}
+                  <p className="text-xs font-bold text-gray-900">
+                    {event.organisateur ? event.organisateur.nom_structure : "Organisateur inconnu"}
+                  </p>
+                  <p className="text-[10px] font-semibold text-gray-400 mt-0.5">
+                    Organisateur vérifié
+                  </p>
                 </div>
               </div>
-              <button className="text-[11px] bg-[#eedfff] text-[#8b44f7] px-5 py-2.5 rounded-2xl transition-all active:scale-95 uppercase tracking-wider">
-                Voir
-              </button>
             </div>
-          </div>
+</div>
 
           {/* Ligne 6 : LIEU dynamique via Google Maps */}
           <div className="p-4">

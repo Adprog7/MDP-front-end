@@ -3,12 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { QrCode, Share, RefreshCcw, MoreHorizontal } from 'lucide-react';
 import { allEvents } from '../data/events';
 import boutonRetourSvg from '../assets/bouton-retour.svg';
-// Je suppose que tu as un icône Apple Wallet dans tes assets, sinon je mets un SVG inline
-// import appleWalletIcon from '../assets/apple-wallet.svg';
 
 const TicketDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  
   const event = allEvents.find(e => e.id === parseInt(id || ''));
 
   useEffect(() => {
@@ -17,119 +16,78 @@ const TicketDetail = () => {
 
   if (!event) return <div className="p-20 text-center font-bold">Billet introuvable</div>;
 
+  // Fonctions de formatage : retournent une chaîne vide si la date est manquante ou invalide
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const d = new Date(dateString);
+    return isNaN(d.getTime()) ? "" : d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'long' });
+  };
+
+  const formatTime = (dateString) => {
+    if (!dateString) return "";
+    const d = new Date(dateString);
+    return isNaN(d.getTime()) ? "" : d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  };
+
   return (
     <div className="min-h-screen bg-[#FDFBF7] font-sans antialiased relative overflow-hidden pb-32">
-
-      {/* ─── HALOS FLOUES DE DÉGRADÉ ─── */}
+      
+      {/* Halo décoratif */}
       <div className="absolute top-0 left-0 right-0 h-96 pointer-events-none z-0">
         <div className="absolute -top-10 -left-20 w-64 h-64 bg-[#FFF9C4]/60 rounded-full blur-3xl" />
         <div className="absolute -top-14 -right-10 w-72 h-72 bg-purple-200/40 rounded-full blur-3xl" />
       </div>
 
-      {/* ─── HEADER ─── */}
+      {/* Header */}
       <div className="relative z-10 px-5 pt-5 pb-6 flex items-center justify-between">
-        <button
-          onClick={() => navigate(-1)}
-          className="active:scale-95 transition-transform w-fit bg-white rounded-full p-1"
-        >
-          <img
-            src={boutonRetourSvg}
-            alt="Retour"
-            className="w-10 h-10 object-contain"
-          />
-        </button>
-
-        <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center font-bold text-gray-900 shadow-sm active:scale-95 transition-transform">
-          ?
+        <button onClick={() => navigate(-1)} className="active:scale-95 transition-transform w-fit bg-white rounded-full p-1 shadow-sm">
+          <img src={boutonRetourSvg} alt="Retour" className="w-10 h-10 object-contain" />
         </button>
       </div>
 
-      {/* ─── TICKET PRINCIPAL ─── */}
+      {/* TICKET PRINCIPAL */}
       <div className="relative z-10 px-5">
-        <div className="bg-white rounded-[20px] shadow-sm relative pt-10 pb-8 px-6 overflow-hidden">
-          
-          {/* Encoche style ticket en haut */}
+        <div className="bg-white rounded-[20px] shadow-sm relative pt-10 pb-8 px-6 overflow-hidden border border-gray-100">
           <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 bg-[#FDFBF7] rounded-full"></div>
 
-          {/* En-tête du ticket (Noms des artistes / Line up) */}
-          <div className="grid grid-cols-3 text-center mb-10 text-[9px] font-bold text-gray-900 leading-tight uppercase">
-            <div>
-              <p>DAVID GUETTA</p>
-              <p>(LE TRANSBORDEUR)</p>
-              <p>24/05/26</p>
-            </div>
-            <div>
-              <p>AFTER SCHOOL</p>
-              <p>(LE SUCRE)</p>
-              <p>24/05/26</p>
-              <p>23:00 - 5:00</p>
-            </div>
-            <div>
-              <p>GUEST</p>
-              <p>(LE TRANSBORDEUR)</p>
-              <p>25/05/26</p>
-            </div>
-          </div>
-
-          {/* Informations événement */}
-          <div className="text-center mb-8">
-            <h2 className="text-sm font-black text-gray-900 uppercase tracking-tight">
-              {event.title} - {event.city}
+          {/* TITRE ET LIEU */}
+          <div className="text-center mb-10">
+            <h2 className="text-lg font-black text-gray-900 uppercase tracking-tight">
+              {event.titre}
             </h2>
+            <p className="text-xs font-bold text-gray-400 uppercase mt-1">{event.lieu}</p>
           </div>
 
-          {/* Zone QR Code */}
+          {/* QR CODE SEUL */}
           <div className="flex flex-col items-center justify-center mb-8">
-            <div className="mb-2">
-              {/* Remplacement du vrai QR code par une icône ou une image générée. Ici j'utilise lucide-react, mais en prod ce serait l'image du QR */}
-              <QrCode size={200} strokeWidth={1} className="text-black" />
+            <div className="bg-gray-50 p-4 rounded-2xl">
+              <QrCode size={220} strokeWidth={1.2} className="text-black" />
             </div>
-            <p className="text-xs font-bold text-gray-400 font-mono tracking-wider">
-              42389014713514 - {event.price}
-            </p>
           </div>
 
-          {/* Footer du ticket (Date & Heure) */}
-          <div className="flex justify-between items-center text-xs font-black text-gray-900">
-            <span>sam 24 Mai.</span>
-            <span>20:00 - 22:30</span>
-          </div>
-
+          {/* FOOTER TICKET : Conditionnel pour ne rien afficher si la date est vide */}
+          {event.date_debut && (
+            <div className="flex justify-between items-center text-xs font-black text-gray-900 border-t border-dashed border-gray-200 pt-6">
+              <span className="uppercase">{formatDate(event.date_debut)}</span>
+              <span className="uppercase">{formatTime(event.date_debut)}</span>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* ─── BOUTONS D'ACTION (Revendre, Transférer, Plus) ─── */}
+      {/* BOUTONS D'ACTION */}
       <div className="relative z-10 px-6 mt-8 flex justify-between gap-4 max-w-sm mx-auto">
-        <button className="flex flex-col items-center gap-2 flex-1 bg-white py-4 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] active:scale-95 transition-transform">
-          <RefreshCcw size={22} className="text-gray-900" />
-          <span className="text-[10px] font-bold text-gray-900">Revendre</span>
+        <button className="flex flex-col items-center gap-2 flex-1 bg-white py-4 rounded-2xl shadow-sm active:scale-95 transition-transform border border-gray-100">
+          <RefreshCcw size={20} className="text-gray-900" />
+          <span className="text-[9px] font-bold text-gray-900 uppercase">Revendre</span>
         </button>
-
-        <button className="flex flex-col items-center gap-2 flex-1 bg-white py-4 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] active:scale-95 transition-transform">
-          <Share size={22} className="text-gray-900" />
-          <span className="text-[10px] font-bold text-gray-900">Transférer</span>
+        <button className="flex flex-col items-center gap-2 flex-1 bg-white py-4 rounded-2xl shadow-sm active:scale-95 transition-transform border border-gray-100">
+          <Share size={20} className="text-gray-900" />
+          <span className="text-[9px] font-bold text-gray-900 uppercase">Transférer</span>
         </button>
-
-        <button className="flex flex-col items-center gap-2 flex-1 bg-white py-4 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] active:scale-95 transition-transform">
-          <MoreHorizontal size={22} className="text-gray-900" />
-          <span className="text-[10px] font-bold text-gray-900">Plus</span>
-        </button>
-      </div>
-
-      {/* ─── BOUTON APPLE WALLET ─── */}
-      <div className="relative z-10 px-5 mt-6 flex justify-center">
-        <button className="bg-black text-white px-5 py-2.5 rounded-[14px] flex items-center gap-3 active:scale-95 transition-transform">
-          {/* Faux logo wallet stylisé en CSS */}
-          <div className="w-8 h-5 bg-white rounded flex items-center justify-center relative overflow-hidden">
-            <div className="w-full h-1/3 bg-orange-400 absolute top-0"></div>
-            <div className="w-full h-1/3 bg-green-500 absolute top-1/3"></div>
-            <div className="w-full h-1/3 bg-blue-500 absolute bottom-0"></div>
-            <div className="w-4 h-2 bg-white rounded-full absolute -top-1"></div>
-          </div>
-          <div className="text-left">
-            <p className="text-[9px] font-medium text-gray-300 leading-tight">Ajouter à</p>
-            <p className="text-sm font-semibold leading-tight">Apple Cartes</p>
-          </div>
+        <button className="flex flex-col items-center gap-2 flex-1 bg-white py-4 rounded-2xl shadow-sm active:scale-95 transition-transform border border-gray-100">
+          <MoreHorizontal size={20} className="text-gray-900" />
+          <span className="text-[9px] font-bold text-gray-900 uppercase">Plus</span>
         </button>
       </div>
 
