@@ -2,29 +2,29 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { QrCode, Share, RefreshCcw, MoreHorizontal } from 'lucide-react';
 import boutonRetourSvg from '../assets/bouton-retour.svg';
+import api from '../services/api';
 
 const TicketDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  
-  const event = allEvents.find(e => e.id === parseInt(id || ''));
+
+  // 1. Déclaration des states indispensables qui manquaient
+  const [ticket, setTicket] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
 
     // Appel API pour récupérer le détail d'un billet précis
-    fetch(`${import.meta.env.VITE_API_URL}/billets/${id}`)
-      .then((res) => {
-        if (!res.ok) throw new Error('Billet introuvable');
-        return res.json();
-      })
-      .then((data) => {
-        setTicket(data);
+    api.get(`/billets/${id}`)
+      .then((reponse) => {
+        setTicket(reponse.data);
         setLoading(false);
       })
       .catch((err) => {
-        console.error(err);
-        setError("Impossible de charger le ticket.");
+        console.error("Erreur lors de la récupération du billet :", err);
+        setError("Impossible de charger le ticket ou accès non autorisé.");
         setLoading(false);
       });
   }, [id]);
@@ -44,6 +44,12 @@ const TicketDetail = () => {
     const d = new Date(dateString);
     return isNaN(d.getTime()) ? "" : d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
   };
+
+  // ⚠️ NOTE : Si ton API Laravel renvoie l'événement directement dans le ticket (ex: ticket.event.titre), 
+  // ajuste les variables ci-dessous en conséquence. Ici, on part du principe que ticket a directement les clés.
+  const displayTitle = ticket.titre || (ticket.event && ticket.event.titre) || "Événement";
+  const displayLieu = ticket.lieu || (ticket.event && ticket.event.lieu) || "Lieu non spécifié";
+  const displayDate = ticket.date_debut || (ticket.event && ticket.event.date_debut);
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] font-sans antialiased relative overflow-hidden pb-32">
@@ -69,9 +75,9 @@ const TicketDetail = () => {
           {/* TITRE ET LIEU */}
           <div className="text-center mb-10">
             <h2 className="text-lg font-black text-gray-900 uppercase tracking-tight">
-              {event.titre}
+              {displayTitle}
             </h2>
-            <p className="text-xs font-bold text-gray-400 uppercase mt-1">{event.lieu}</p>
+            <p className="text-xs font-bold text-gray-400 uppercase mt-1">{displayLieu}</p>
           </div>
 
           {/* QR CODE SEUL */}
@@ -81,11 +87,11 @@ const TicketDetail = () => {
             </div>
           </div>
 
-          {/* FOOTER TICKET : Conditionnel pour ne rien afficher si la date est vide */}
-          {event.date_debut && (
+          {/* FOOTER TICKET */}
+          {displayDate && (
             <div className="flex justify-between items-center text-xs font-black text-gray-900 border-t border-dashed border-gray-200 pt-6">
-              <span className="uppercase">{formatDate(event.date_debut)}</span>
-              <span className="uppercase">{formatTime(event.date_debut)}</span>
+              <span className="uppercase">{formatDate(displayDate)}</span>
+              <span className="uppercase">{formatTime(displayDate)}</span>
             </div>
           )}
         </div>
